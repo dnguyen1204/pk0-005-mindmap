@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CompTIA Project+ (PK0-005) — Interactive Concept Mindmap</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f1f5f9; color: #1e293b; overflow: hidden; overscroll-behavior: none; }
+  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  header { background: #0f172a; color: #f8fafc; padding: 12px 20px; flex: 0 0 auto; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 .badge { background: #38bdf8; color: #0f172a; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+  header p { font-size: 12.5px; color: #cbd5e1; margin-top: 4px; line-height: 1.5; }
+  header p b { color: #fde68a; }
+  #toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0; flex: 0 0 auto; flex-wrap: wrap; }
+  #toolbar button { border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 8px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; font-weight: 600; }
+  #toolbar button:hover { background: #e2e8f0; }
+  #toolbar button.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+  #searchWrap { position: relative; flex: 1 1 220px; max-width: 340px; }
+  #search { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+  #searchResults { position: absolute; top: 38px; left: 0; right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.15); max-height: 280px; overflow-y: auto; z-index: 50; display: none; }
+  #searchResults .sr { padding: 7px 12px; font-size: 12.5px; cursor: pointer; border-bottom: 1px solid #f1f5f9; }
+  #searchResults .sr:hover { background: #f1f5f9; }
+  #searchResults .sr .path { color: #64748b; font-size: 11px; display: block; }
+  #nodeCount { font-size: 12px; color: #64748b; margin-left: auto; white-space: nowrap; }
+  #mapWrap { position: relative; flex: 1 1 auto; min-height: 220px; overflow: hidden; }
+  #map { width: 100%; height: 100%; display: block; cursor: grab; background: radial-gradient(circle at 50% 40%, #ffffff 0%, #f1f5f9 70%); touch-action: none; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; overscroll-behavior: none; }
+  #map.panning { cursor: grabbing; }
+  #viewport { will-change: transform; transform-origin: 0 0; }
+  #legendToggle { display: none; }
+  #legend { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,.95); border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.08); z-index: 20; }
+  #legend h4 { font-size: 12px; margin-bottom: 6px; color: #0f172a; }
+  #legend .li { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+  #legend .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+  #legend .dash { width: 22px; border-top: 2px dashed #7c3aed; flex: 0 0 auto; }
+  #tooltip { position: fixed; display: none; max-width: 380px; background: #0f172a; color: #f8fafc; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; z-index: 100; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  #tooltip .t { font-weight: 700; color: #fde68a; display: block; margin-bottom: 4px; }
+  .node-rect { cursor: pointer; transition: filter .15s; }
+  .node-rect:hover { filter: brightness(.96); }
+  .node-label { font-size: 13px; font-weight: 600; fill: #1e293b; pointer-events: none; }
+  .node-label.root-label { fill: #ffffff; }
+  .toggle { cursor: pointer; }
+  .toggle circle { stroke-width: 1.5; }
+  .toggle text { font-size: 13px; font-weight: 700; pointer-events: none; }
+  .edge { fill: none; stroke-width: 2; opacity: .55; }
+  .xlink { fill: none; stroke: #7c3aed; stroke-width: 1.6; stroke-dasharray: 6 5; opacity: .55; }
+  .xlink:hover { opacity: 1; stroke-width: 2.4; }
+  @keyframes pulse { 0% { stroke-width: 2; } 50% { stroke-width: 6; } 100% { stroke-width: 2; } }
+  .highlight rect { animation: pulse 1s ease-in-out 3; stroke: #f59e0b !important; }
+
+  /* ---- rich tooltip ---- */
+  #tooltip .d { display: block; margin: 3px 0 2px; color: #e2e8f0; }
+  #tooltip .k { display: block; margin-top: 7px; padding-top: 7px; border-top: 1px solid #334155; color: #a5f3fc; font-size: 12px; line-height: 1.45; }
+  #tooltip .tip { display: block; margin-top: 7px; color: #fde68a; font-size: 12px; line-height: 1.45; }
+  /* ---- detail panel ---- */
+  #detailPanel { position: absolute; top: 12px; left: 12px; width: 305px; max-height: calc(100% - 24px); overflow-y: auto;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    padding: 14px 16px; z-index: 30; transform: translateX(-118%); transition: transform .22s ease; font-size: 13px; }
+  #detailPanel.open { transform: translateX(0); }
+  #detailPanel .dp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  #detailPanel .dp-phase { color: #fff; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+  #detailPanel .dp-head button { border: none; background: #f1f5f9; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; color: #475569; line-height: 1; }
+  #detailPanel .dp-head button:hover { background: #e2e8f0; }
+  #detailPanel h3 { font-size: 15px; margin-bottom: 8px; color: #0f172a; }
+  #detailPanel .dp-def { line-height: 1.55; color: #334155; margin-bottom: 8px; }
+  #detailPanel .dp-k { font-size: 12.5px; color: #0369a1; background: #f0f9ff; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; line-height: 1.5; }
+  #detailPanel .dp-tip { font-size: 12.5px; color: #92400e; background: #fffbeb; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
+  #dpAdd { width: 100%; border: none; border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 700; cursor: pointer; background: #0f172a; color: #fff; }
+  #dpAdd:hover { background: #1e293b; }
+  #dpAdd.in { background: #16a34a; }
+  /* ---- flashcard basket panel ---- */
+  #basketPanel { position: absolute; top: 12px; right: 12px; width: 335px; max-height: calc(100% - 24px); overflow-y: auto;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    padding: 14px 16px; z-index: 30; transform: translateX(118%); transition: transform .22s ease; font-size: 13px; }
+  #basketPanel.open { transform: translateX(0); }
+  #basketPanel .bp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  #basketPanel .bp-head h3 { font-size: 14.5px; color: #0f172a; }
+  #basketPanel .bp-head button { border: none; background: #f1f5f9; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; color: #475569; line-height: 1; }
+  #basketPanel .bp-head button:hover { background: #e2e8f0; }
+  #basketPanel .bp-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+  #basketPanel .bp-actions button { flex: 1; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 7px; font-size: 12.5px; font-weight: 700; cursor: pointer; color: #0f172a; }
+  #basketPanel .bp-actions button:hover:not(:disabled) { background: #e2e8f0; }
+  #basketPanel .bp-actions button:disabled { opacity: .45; cursor: default; }
+  #bpList .bp-empty { color: #64748b; font-size: 12.5px; text-align: center; padding: 18px 6px; line-height: 1.6; }
+  #bpList .fc-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid #f1f5f9; border-radius: 8px; margin-bottom: 6px; background: #f8fafc; font-size: 12.5px; }
+  #bpList .fc-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #bpList .fc-item button { border: none; background: none; color: #dc2626; font-size: 16px; cursor: pointer; line-height: 1; padding: 2px 6px; }
+  #bpList .fc-item button:hover { background: #fee2e2; border-radius: 6px; }
+  /* ---- study mode ---- */
+  #fcCard { perspective: 900px; cursor: pointer; height: 210px; margin-bottom: 10px; }
+  #fcCard .fc-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .45s ease; }
+  #fcCard.flipped .fc-inner { transform: rotateY(180deg); }
+  #fcCard .fc-front, #fcCard .fc-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow-y: auto; }
+  #fcCard .fc-front { background: #0f172a; color: #fff; }
+  #fcCard .fc-front .fc-label { font-size: 17px; font-weight: 700; line-height: 1.4; }
+  #fcCard .fc-front .fc-hint { margin-top: 12px; font-size: 11px; color: #94a3b8; }
+  #fcCard .fc-back { background: #f8fafc; border: 2px solid #0f172a; transform: rotateY(180deg); justify-content: flex-start; text-align: left; align-items: stretch; }
+  #fcCard .fc-back .fc-def { font-size: 12.5px; line-height: 1.55; color: #1e293b; }
+  #fcCard .fc-back .fc-key { margin-top: 10px; font-size: 12px; color: #0369a1; line-height: 1.5; }
+  #studyView .fc-nav { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  #studyView .fc-nav button { flex: 1; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; padding: 7px 4px; font-size: 12px; font-weight: 700; cursor: pointer; color: #0f172a; }
+  #studyView .fc-nav button:hover { background: #e2e8f0; }
+  #studyView .fc-nav span { font-size: 12.5px; font-weight: 700; color: #475569; white-space: nowrap; }
+  #fcExit { background: #fef2f2 !important; border-color: #fecaca !important; color: #991b1b !important; }
+
+  /* ---- learned marks ---- */
+  .learn-badge { pointer-events: none; }
+  /* ---- toolbar progress ---- */
+  #btnProgress { display: inline-flex; align-items: center; gap: 7px; }
+  .lp-track { display: inline-block; width: 64px; height: 9px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+  .lp-fill { display: block; height: 100%; width: 0; background: #16a34a; border-radius: 5px; transition: width .25s ease; }
+  #lpText { font-weight: 700; min-width: 40px; text-align: left; }
+  .ph-pct { margin-left: auto; color: #64748b; font-weight: 700; font-size: 11.5px; }
+  /* ---- progress panel ---- */
+  #progressPanel { position: absolute; top: 12px; right: 12px; width: 335px; max-height: calc(100% - 24px); overflow-y: auto;
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    padding: 14px 16px; z-index: 30; transform: translateX(118%); transition: transform .22s ease; font-size: 13px; }
+  #progressPanel.open { transform: translateX(0); }
+  #progressPanel .pp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  #progressPanel .pp-head h3 { font-size: 14.5px; color: #0f172a; }
+  #progressPanel .pp-head button { border: none; background: #f1f5f9; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; cursor: pointer; color: #475569; line-height: 1; }
+  #progressPanel .pp-head button:hover { background: #e2e8f0; }
+  .pp-overall { margin-bottom: 12px; }
+  .pp-bar { height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 6px; }
+  .pp-fill { display: block; height: 100%; background: #16a34a; border-radius: 6px; transition: width .25s ease; }
+  #ppOverallText { font-size: 12px; color: #64748b; }
+  .pp-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 12.5px; }
+  .pp-row .dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+  .pp-row .pp-name { flex: 0 0 104px; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pp-row .pp-bar { flex: 1 1 auto; margin-bottom: 0; height: 10px; }
+  .pp-row .pp-count { flex: 0 0 auto; color: #64748b; font-size: 11.5px; min-width: 46px; text-align: right; }
+  .pp-row .pp-pct { flex: 0 0 auto; font-weight: 700; color: #0f172a; min-width: 40px; text-align: right; }
+  .pp-actions { margin-top: 12px; }
+  .pp-actions button { width: 100%; border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; border-radius: 8px; padding: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .pp-actions button:hover { background: #fee2e2; }
+  /* ---- detail panel: learned button ---- */
+  #dpLearn { width: 100%; border: 1px solid #bbf7d0; border-radius: 8px; padding: 9px; font-size: 13px; font-weight: 700; cursor: pointer; background: #f0fdf4; color: #15803d; margin-top: 8px; }
+  #dpLearn:hover { background: #dcfce7; }
+  #dpLearn.on { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+
+  /* ---- language toggle ---- */
+  #langToggle { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+  #langToggle button { border: none !important; border-radius: 0 !important; padding: 6px 14px; }
+  #langToggle button.on { background: #0f172a; color: #fff; }
+  .node-sub { font-size: 10px; font-weight: 500; fill: #64748b; }
+  #tooltip .ten { color: #94a3b8; font-size: 11px; font-weight: 500; }
+  .dp-en { color: #64748b; font-size: 12px; margin: -4px 0 8px; }
+  .fc-alt { margin-top: 8px; font-size: 11.5px; color: #64748b; line-height: 1.5; }
+  @media (hover: none) {
+    #tooltip { display: none !important; }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 8px 12px; }
+    header h1 { font-size: 15px; }
+    header p { font-size: 11px; }
+    #toolbar { gap: 6px; padding: 6px 10px; }
+    #toolbar button { min-height: 44px; min-width: 44px; padding: 8px 12px; font-size: 13.5px; touch-action: manipulation; }
+    #searchWrap { flex: 1 1 100%; max-width: none; }
+    #search { font-size: 16px; padding: 10px 12px; }
+    #nodeCount { display: none; }
+    /* collapsible legend on mobile */
+    #legend { top: 8px; right: 8px; padding: 0; }
+    #legendToggle { display: block; border: none; background: none; font-size: 13px; font-weight: 700; color: #0f172a; padding: 12px 16px; min-height: 44px; cursor: pointer; }
+    #legendBody { display: none; padding: 0 14px 12px; }
+    #legend.open #legendBody { display: block; }
+    /* bottom-sheet detail panel on mobile */
+    #detailPanel { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 48%; transform: translateY(135%); border-radius: 16px; }
+    #detailPanel.open { transform: translateY(0); }
+    #detailPanel .dp-head button { width: 44px; height: 44px; font-size: 22px; }
+    #dpAdd { min-height: 48px; font-size: 14.5px; }
+    /* near-fullscreen basket panel on mobile */
+    #basketPanel { top: 8px; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: none; transform: translateX(115%); border-radius: 16px; }
+    #basketPanel.open { transform: translateX(0); }
+    #basketPanel .bp-head button { width: 44px; height: 44px; font-size: 22px; }
+    #basketPanel .bp-actions button { min-height: 44px; font-size: 13.5px; }
+    #bpList .fc-item { padding: 8px 10px 8px 12px; font-size: 13.5px; }
+    #bpList .fc-item button { min-width: 44px; min-height: 44px; font-size: 20px; }
+    #fcCard { height: 230px; }
+    #studyView .fc-nav button { min-height: 44px; font-size: 13px; }
+    /* progress panel: near-fullscreen on mobile, like the basket */
+    #progressPanel { top: 8px; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: none; transform: translateX(115%); border-radius: 16px; }
+    #progressPanel.open { transform: translateX(0); }
+    #progressPanel .pp-head button { width: 44px; height: 44px; font-size: 22px; }
+    #progressPanel .pp-actions button { min-height: 44px; font-size: 13.5px; }
+    #dpLearn { min-height: 48px; font-size: 14.5px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>CompTIA Project+ (PK0-005) — Interactive Concept Mindmap <span class="badge" id="examBadge">EXAM MAP</span></h1>
+    <p><b>How to use:</b> click any node to expand / collapse its branch &nbsp;•&nbsp; drag to pan, scroll to zoom &nbsp;•&nbsp; search a concept to jump to it &nbsp;•&nbsp; hover a node for a detailed definition &nbsp;•&nbsp; long-press a node to mark it as learned &nbsp;•&nbsp; <b>dashed purple lines</b> show cross-links between related concepts across phases.</p>
+  </header>
+  <div id="toolbar">
+    <div id="searchWrap">
+      <input id="search" type="text" placeholder="Search a concept… (e.g. critical path, RACI, EVM)" autocomplete="off">
+      <div id="searchResults"></div>
+    </div>
+    <button id="btnExpand">Expand all</button>
+    <button id="btnCollapse">Collapse all</button>
+    <button id="btnFit">Fit view</button>
+    <button id="btnZoomIn">+</button>
+    <button id="btnZoomOut">−</button>
+    <button id="btnLinks" class="active">Cross-links</button>
+    <button id="btnFlashcards" title="Open your flashcard basket">🗂 Flashcards (<span id="fcCount">0</span>)</button>
+    <div id="langToggle" role="group" aria-label="Language"><button id="langEN" class="on">EN</button><button id="langVI">VI</button></div>
+    <button id="btnProgress" title="Show learning progress">📊 <span class="lp-track"><span class="lp-fill" id="lpFill"></span></span><span id="lpText">0%</span></button>
+    <span id="nodeCount"></span>
+  </div>
+  <div id="mapWrap">
+    <svg id="map"><g id="viewport"><g id="xlinks"></g><g id="edges"></g><g id="nodes"></g></g></svg>
+    <div id="detailPanel"></div>
+    <div id="basketPanel">
+      <div class="bp-head"><h3>🗂 Flashcard Basket <span id="bpCount"></span></h3><button id="bpClose" title="Close">×</button></div>
+      <div class="bp-actions"><button id="bpStudy">▶ Study</button><button id="bpClear">Clear all</button></div>
+      <div id="bpList"></div>
+      <div id="studyView" style="display:none">
+        <div id="fcCard"><div class="fc-inner">
+          <div class="fc-front"><div class="fc-label" id="fcFront"></div><div class="fc-hint">click card to flip</div></div>
+          <div class="fc-back"><div class="fc-def" id="fcBack"></div><div class="fc-key" id="fcKey"></div><div class="fc-alt" id="fcAlt"></div></div>
+        </div></div>
+        <div class="fc-nav"><button id="fcPrev">‹ Prev</button><span id="fcCount2"></span><button id="fcNext">Next ›</button></div>
+        <div class="fc-nav"><button id="fcShuffle">🔀 Shuffle</button><button id="fcRemove">Remove</button><button id="fcExit">✕ Exit</button></div>
+      </div>
+    </div>
+    <div id="progressPanel">
+      <div class="pp-head"><h3>📊 Learning Progress <span id="ppTotal"></span></h3><button id="ppClose" title="Close">×</button></div>
+      <div class="pp-overall"><div class="pp-bar"><div class="pp-fill" id="ppOverallFill"></div></div><div id="ppOverallText"></div></div>
+      <div id="ppRows"></div>
+      <div class="pp-actions"><button id="ppReset">Reset progress</button></div>
+    </div>
+    <div id="legend">
+      <button id="legendToggle" aria-label="Toggle legend">Phases ▾</button>
+      <div id="legendBody">
+      <h4>Phases</h4>
+      <div class="li"><span class="dot" style="background:#2563eb"></span>1 · Discovery</div>
+      <div class="li"><span class="dot" style="background:#16a34a"></span>2 · Initiation</div>
+      <div class="li"><span class="dot" style="background:#d97706"></span>3 · Planning</div>
+      <div class="li"><span class="dot" style="background:#dc2626"></span>4 · Execution</div>
+      <div class="li"><span class="dot" style="background:#0d9488"></span>5 · Closing</div>
+      <div class="li"><span class="dash"></span>cross-link</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="tooltip"></div>
+<script src="data.js"></script>
+<script>
+"use strict";
+/* ================= DATA ================= */
+var PHASES = {
+  1: { name: "1 · Discovery",  name_vi: "1 · Khám phá",      color: "#2563eb", light: "#dbeafe" },
+  2: { name: "2 · Initiation", name_vi: "2 · Khởi tạo",      color: "#16a34a", light: "#dcfce7" },
+  3: { name: "3 · Planning",   name_vi: "3 · Lập kế hoạch",  color: "#d97706", light: "#fef3c7" },
+  4: { name: "4 · Execution",  name_vi: "4 · Thực thi",      color: "#dc2626", light: "#fee2e2" },
+  5: { name: "5 · Closing",    name_vi: "5 · Kết thúc",      color: "#0d9488", light: "#ccfbf1" }
+};
+
+
+function VIinfo(id){ return VI[id] || null; }
+function curLabel(n){ var v = VIinfo(n.id); return (LANG === "vi" && v && v.l_vi) ? v.l_vi : n.label; }
+function curDef(n){ var v = VIinfo(n.id); if(LANG === "vi" && v && v.d_vi) return v.d_vi; var info = DETAIL[n.id]; return (info && info.d) || n.def || ""; }
+function curKey(n){ var v = VIinfo(n.id); if(LANG === "vi" && v && v.k_vi) return v.k_vi; var info = DETAIL[n.id]; return (info && info.k) || ""; }
+function curTip(n){ var v = VIinfo(n.id); if(LANG === "vi" && v && v.t_vi) return v.t_vi; var info = DETAIL[n.id]; return (info && info.t) || ""; }
+function viLabel(n){ var v = VIinfo(n.id); return (v && v.l_vi && v.l_vi !== n.label) ? v.l_vi : null; }
+function curPhaseName(p){ return (LANG === "vi" && PHASES[p].name_vi) ? PHASES[p].name_vi : PHASES[p].name; }
+
+var I18N = {
+en: {
+  searchPh: "Search a concept… (e.g. critical path, RACI, EVM)",
+  expandAll: "Expand all", collapseAll: "Collapse all", fitView: "Fit view",
+  crossLinks: "Cross-links", flashcards: "Flashcards",
+  basketTitle: "🗂️ Flashcard Basket", study: "\u25B6 Study", clearAll: "Clear all",
+  noCards: 'No flashcards yet.<br>Click any node, then press<br>"+ Add to Flashcards".',
+  flipHint: "click card to flip", prev: "\u2039 Prev", next: "Next \u203A",
+  shuffle: "🔀 Shuffle", remove: "Remove", exit: "\u2715 Exit",
+  addToFc: "+ Add to Flashcards", inBasket: "\u2713 In basket \u2014 remove",
+  markLearned: "\u2713 Mark as learned", markNotLearned: "\u21A9 Mark as not learned",
+  progressTitle: "📊 Learning Progress", resetProgress: "Reset progress",
+  conceptsLearned: "concepts learned",
+  noMatches: "No matches", phases: "Phases", crossLink: "cross-link",
+  overview: "Overview", examMap: "EXAM MAP",
+  confirmClearFc: "Remove all flashcards from the basket?",
+  confirmReset: "Clear all learned marks? This cannot be undone.",
+  nodeCount: function(t){ return t + " concepts \u00B7 5 phases"; },
+  progressTip: function(l, t){ return l + " of " + t + " concepts learned \u2014 click for details"; },
+  howto: '<b>How to use:</b> click any node to expand / collapse its branch &nbsp;\u2022&nbsp; drag to pan, scroll to zoom &nbsp;\u2022&nbsp; search a concept to jump to it &nbsp;\u2022&nbsp; hover a node for a detailed definition &nbsp;\u2022&nbsp; long-press a node to mark it as learned &nbsp;\u2022&nbsp; <b>dashed purple lines</b> show cross-links between related concepts across phases.',
+  howtoTouch: '<b>How to use:</b> tap a node to expand it &amp; see details &nbsp;\u2022&nbsp; long-press a node to mark it as learned &nbsp;\u2022&nbsp; drag with 1 finger to pan &nbsp;\u2022&nbsp; pinch with 2 fingers to zoom &nbsp;\u2022&nbsp; search a concept to jump to it &nbsp;\u2022&nbsp; <b>dashed purple lines</b> show cross-links.'
+},
+vi: {
+  searchPh: "T\u00ECm kh\u00E1i ni\u1EC7m\u2026 (v\u00ED d\u1EE5: \u0111\u01B0\u1EDDng g\u0103ng, RACI, EVM)",
+  expandAll: "M\u1EDF r\u1ED9ng t\u1EA5t c\u1EA3", collapseAll: "Thu g\u1ECDn t\u1EA5t c\u1EA3", fitView: "V\u1EEBa m\u00E0n h\u00ECnh",
+  crossLinks: "Li\u00EAn k\u1EBFt ch\u00E9o", flashcards: "Th\u1EBB ghi nh\u1EDB",
+  basketTitle: "🗂️ Gi\u1ECF Flashcard", study: "\u25B6 H\u1ECDc", clearAll: "X\u00F3a h\u1EBFt",
+  noCards: 'Ch\u01B0a c\u00F3 flashcard n\u00E0o.<br>B\u1EA5m v\u00E0o m\u1ED9t node, r\u1ED3i ch\u1ECDn<br>"+ Th\u00EAm v\u00E0o Flashcard".',
+  flipHint: "b\u1EA5m v\u00E0o th\u1EBB \u0111\u1EC3 l\u1EADt", prev: "\u2039 Tr\u01B0\u1EDBc", next: "Ti\u1EBFp \u203A",
+  shuffle: "🔀 X\u00E1o tr\u1ED9n", remove: "X\u00F3a", exit: "\u2715 Tho\u00E1t",
+  addToFc: "+ Th\u00EAm v\u00E0o Flashcard", inBasket: "\u2713 Trong gi\u1ECF \u2014 x\u00F3a",
+  markLearned: "\u2713 \u0110\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc", markNotLearned: "\u21A9 B\u1ECF \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc",
+  progressTitle: "📊 Ti\u1EBFn \u0111\u1ED9 h\u1ECDc t\u1EADp", resetProgress: "\u0110\u1EB7t l\u1EA1i ti\u1EBFn \u0111\u1ED9",
+  conceptsLearned: "kh\u00E1i ni\u1EC7m \u0111\u00E3 h\u1ECDc",
+  noMatches: "Kh\u00F4ng t\u00ECm th\u1EA5y", phases: "C\u00E1c giai \u0111o\u1EA1n", crossLink: "li\u00EAn k\u1EBFt ch\u00E9o",
+  overview: "T\u1ED5ng quan", examMap: "B\u1EA2N \u0110\u1ED2 \u00D4N THI",
+  confirmClearFc: "X\u00F3a t\u1EA5t c\u1EA3 flashcard kh\u1ECFi gi\u1ECF?",
+  confirmReset: "X\u00F3a t\u1EA5t c\u1EA3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc? Kh\u00F4ng th\u1EC3 ho\u00E0n t\u00E1c.",
+  nodeCount: function(t){ return t + " kh\u00E1i ni\u1EC7m \u00B7 5 giai \u0111o\u1EA1n"; },
+  progressTip: function(l, t){ return "\u0110\u00E3 h\u1ECDc " + l + " / " + t + " kh\u00E1i ni\u1EC7m \u2014 b\u1EA5m \u0111\u1EC3 xem chi ti\u1EBFt"; },
+  howto: '<b>C\u00E1ch d\u00F9ng:</b> b\u1EA5m v\u00E0o node \u0111\u1EC3 m\u1EDF / thu g\u1ECDn nh\u00E1nh &nbsp;\u2022&nbsp; k\u00E9o \u0111\u1EC3 di chuy\u1EC3n, cu\u1ED9n \u0111\u1EC3 zoom &nbsp;\u2022&nbsp; t\u00ECm kh\u00E1i ni\u1EC7m \u0111\u1EC3 nh\u1EA3y t\u1EDBi &nbsp;\u2022&nbsp; di chu\u1ED9t l\u00EAn node \u0111\u1EC3 xem gi\u1EA3i th\u00EDch chi ti\u1EBFt &nbsp;\u2022&nbsp; gi\u1EEF l\u00E2u v\u00E0o node \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc &nbsp;\u2022&nbsp; <b>\u0111\u01B0\u1EDDng n\u00E9t \u0111\u1EE9t m\u00E0u t\u00EDm</b> l\u00E0 li\u00EAn k\u1EBFt ch\u00E9o gi\u1EEFa c\u00E1c kh\u00E1i ni\u1EC7m.',
+  howtoTouch: '<b>C\u00E1ch d\u00F9ng:</b> ch\u1EA1m v\u00E0o node \u0111\u1EC3 m\u1EDF r\u1ED9ng &amp; xem chi ti\u1EBFt &nbsp;\u2022&nbsp; gi\u1EEF l\u00E2u v\u00E0o node \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc &nbsp;\u2022&nbsp; k\u00E9o 1 ng\u00F3n \u0111\u1EC3 di chuy\u1EC3n &nbsp;\u2022&nbsp; pinch 2 ng\u00F3n \u0111\u1EC3 zoom &nbsp;\u2022&nbsp; t\u00ECm kh\u00E1i ni\u1EC7m \u0111\u1EC3 nh\u1EA3y t\u1EDBi &nbsp;\u2022&nbsp; <b>\u0111\u01B0\u1EDDng n\u00E9t \u0111\u1EE9t m\u00E0u t\u00EDm</b> l\u00E0 li\u00EAn k\u1EBFt ch\u00E9o.'
+}
+};
+function T(k){ var d = I18N[LANG] || I18N.en; return (k in d) ? d[k] : I18N.en[k]; }
+function setText(id, key, suffix){ var el = document.getElementById(id); if(el) el.textContent = T(key) + (suffix || ""); }
+
+function applyHowto(){
+  var hp = document.querySelector("header p");
+  if(hp) hp.innerHTML = isTouchDevice ? T("howtoTouch") : T("howto");
+}
+function renderLegend(){
+  var body = document.getElementById("legendBody");
+  var html = "<h4>" + escHtml(T("phases")) + "</h4>";
+  for(var p = 1; p <= 5; p++){
+    html += '<div class="li"><span class="dot" style="background:' + PHASES[p].color + '"></span>'
+      + escHtml(curPhaseName(p)) + '<span class="ph-pct" id="phPct' + p + '">0%</span></div>';
+  }
+  html += '<div class="li"><span class="dash"></span>' + escHtml(T("crossLink")) + "</div>";
+  body.innerHTML = html;
+}
+function applyI18n(){
+  document.documentElement.lang = (LANG === "vi") ? "vi" : "en";
+  var s = document.getElementById("search"); if(s) s.placeholder = T("searchPh");
+  setText("btnExpand", "expandAll"); setText("btnCollapse", "collapseAll");
+  setText("btnFit", "fitView"); setText("btnLinks", "crossLinks");
+  setText("examBadge", "examMap"); setText("legendToggle", "phases", " \u25BE");
+  document.getElementById("btnFlashcards").innerHTML = "🗂️ " + escHtml(T("flashcards")) + ' (<span id="fcCount">' + basket.length + "</span>)";
+  var bh = document.querySelector("#basketPanel .bp-head h3"); if(bh) bh.textContent = T("basketTitle");
+  setText("bpStudy", "study"); setText("bpClear", "clearAll");
+  var ph = document.querySelector("#progressPanel .pp-head h3"); if(ph) ph.textContent = T("progressTitle");
+  setText("ppReset", "resetProgress");
+  setText("fcPrev", "prev"); setText("fcNext", "next");
+  setText("fcShuffle", "shuffle"); setText("fcRemove", "remove"); setText("fcExit", "exit");
+  var hint = document.querySelector("#fcCard .fc-hint"); if(hint) hint.textContent = T("flipHint");
+  renderLegend(); applyHowto();
+  var nc = document.getElementById("nodeCount"); if(nc) nc.textContent = T("nodeCount")(allNodes.length);
+  renderBasket();
+}
+
+/* bilingual node width: in VI mode measure both lines */
+function nodeWidthFor(n){
+  if(LANG === "vi" && n.id !== "root"){
+    var v = VIinfo(n.id);
+    if(v && v.l_vi){
+      mctx.font = "600 13px -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+      var w1 = mctx.measureText(v.l_vi).width;
+      mctx.font = "500 10px -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+      var w2 = mctx.measureText(n.label).width;
+      return Math.ceil(Math.max(w1, w2)) + 58;
+    }
+  }
+  return nodeWidth(n.label);
+}
+/* paint two-line label: VI main + EN sublabel */
+function paintLabel(n){
+  var useVi = (LANG === "vi" && n.id !== "root" && !!viLabel(n));
+  var v = useVi ? VIinfo(n.id) : null;
+  var sig = (useVi ? "v" : "e") + "|" + n._w;
+  if(n._labelSig === sig) return;
+  n._labelSig = sig;
+  var t = n._label, ts1 = n._ts1, ts2 = n._ts2, cx = n._w / 2;
+  ts1.setAttribute("x", cx); ts2.setAttribute("x", cx);
+  if(useVi){
+    t.setAttribute("y", NODE_H / 2 - 3);
+    ts1.setAttribute("dy", "0"); ts1.textContent = v.l_vi;
+    ts2.style.display = ""; ts2.setAttribute("dy", "1.35em"); ts2.textContent = n.label;
+  } else {
+    t.setAttribute("y", NODE_H / 2 + 4.5);
+    ts1.setAttribute("dy", "0"); ts1.textContent = n.label;
+    ts2.style.display = "none"; ts2.textContent = "";
+  }
+}
+function rebuildDOM(){
+  gNodes.innerHTML = ""; gEdges.innerHTML = ""; gX.innerHTML = "";
+  allNodes.forEach(function(n){
+    n._w = nodeWidthFor(n);
+    n._g = null; n._rect = null; n._edge = null;
+    n._tglText = null; n._tglCirc = null; n._badge = null;
+    n._label = null; n._ts1 = null; n._ts2 = null; n._labelSig = null;
+  });
+  buildDOM();
+  scheduleUpdate();
+}
+function setLang(l){
+  if((l !== "en" && l !== "vi") || LANG === l) return;
+  LANG = l; saveLang();
+  NODE_H = (l === "vi") ? 46 : 32;
+  document.getElementById("langEN").classList.toggle("on", l === "en");
+  document.getElementById("langVI").classList.toggle("on", l === "vi");
+  applyI18n();
+  rebuildDOM();
+  if(detailPanel.classList.contains("open") && detailPanel._nodeId && nodeMap[detailPanel._nodeId]) openDetail(nodeMap[detailPanel._nodeId]);
+  var pp = document.getElementById("progressPanel");
+  if(pp && pp.classList.contains("open")) renderProgressPanel();
+  updateProgress();
+}
+/* flashcard bilingual helpers (also migrate old-format entries) */
+function viOf(id){ return VIinfo(id) || {}; }
+function bcLabel(b){ if(LANG === "vi"){ return b.label_vi || viOf(b.id).l_vi || b.label; } return b.label; }
+function bcDef(b){ if(LANG === "vi"){ return b.def_vi || viOf(b.id).d_vi || b.def; } return b.def; }
+function bcKey(b){ if(LANG === "vi"){ return b.key_vi || viOf(b.id).k_vi || b.key; } return b.key; }
+function bcAltTerm(b){
+  if(LANG === "vi") return b.label;
+  return b.label_vi || viOf(b.id).l_vi || "";
+}
+
+/* ================= ENGINE ================= */
+var NODE_H = 32, V_GAP = 10, H_GAP = 52, ROOT_W = 280;
+var nodeMap = {}, allNodes = [];
+var showLinks = true, tx = 0, ty = 0, k = 1, panning = false, movedFar = false;
+
+var svg = document.getElementById("map"),
+    viewport = document.getElementById("viewport"),
+    gEdges = document.getElementById("edges"),
+    gNodes = document.getElementById("nodes"),
+    gX = document.getElementById("xlinks"),
+    tooltip = document.getElementById("tooltip");
+
+var mCanvas = document.createElement("canvas"), mctx = mCanvas.getContext("2d");
+function nodeWidth(label){ mctx.font = "600 13px -apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"; return Math.ceil(mctx.measureText(label).width) + 58; }
+
+function indexTree(node, parent, phase){
+  node._parent = parent || null;
+  node._phase = node.phase || phase || 0;
+  node._collapsed = false;
+  node._w = nodeWidthFor(node);
+  nodeMap[node.id] = node; allNodes.push(node);
+  (node.children || []).forEach(function(c){ indexTree(c, node, node._phase); });
+}
+function kids(n){ return n._collapsed ? [] : (n.children || []); }
+function isVisible(n){ var p = n._parent; while(p){ if(p._collapsed) return false; p = p._parent; } return true; }
+
+function layoutSide(phases, side){
+  var depthMax = {};
+  function scan(n, d){ depthMax[d] = Math.max(depthMax[d] || 0, n._w); kids(n).forEach(function(c){ scan(c, d + 1); }); }
+  phases.forEach(function(p){ scan(p, 1); });
+  var xPos = {}, acc = ROOT_W / 2 + H_GAP, d = 1;
+  while(depthMax[d]){ xPos[d] = acc; acc += depthMax[d] + H_GAP; d++; }
+  var cur = { y: 0 };
+  function place(n, dd){
+    var ks = kids(n); n._side = side; n._depth = dd;
+    n._x = side > 0 ? xPos[dd] : -xPos[dd] - n._w;
+    n._cx = n._x + n._w / 2;
+    if(ks.length === 0){ n._cy = cur.y + NODE_H / 2; cur.y += NODE_H + V_GAP; }
+    else { ks.forEach(function(c){ place(c, dd + 1); }); n._cy = (ks[0]._cy + ks[ks.length - 1]._cy) / 2; }
+  }
+  phases.forEach(function(p){ place(p, 1); });
+  return cur.y;
+}
+
+function relayout(){
+  var right = [nodeMap.discovery, nodeMap.planning, nodeMap.closing];
+  var left = [nodeMap.initiation, nodeMap.execution];
+  var rh = layoutSide(right, 1), lh = layoutSide(left, -1);
+  var totalH = Math.max(rh, lh);
+  function shift(phaseList, h){ var off = (totalH - h) / 2; function s(n){ n._cy += off; kids(n).forEach(s); } phaseList.forEach(s); }
+  shift(right, rh); shift(left, lh);
+  var root = nodeMap.root;
+  root._cx = 0; root._cy = totalH / 2; root._x = -ROOT_W / 2; root._w = ROOT_W; root._side = 0; root._depth = 0;
+}
+
+function edgePath(p, n){
+  var x1, y1 = p._cy, x2, y2 = n._cy, dx;
+  if(n._side > 0){ x1 = p._x + p._w; x2 = n._x; dx = Math.max(24, (x2 - x1) / 2); return "M" + x1 + "," + y1 + " C" + (x1 + dx) + "," + y1 + " " + (x2 - dx) + "," + y2 + " " + x2 + "," + y2; }
+  x1 = p._x; x2 = n._x + n._w; dx = Math.max(24, (x1 - x2) / 2);
+  return "M" + x1 + "," + y1 + " C" + (x1 - dx) + "," + y1 + " " + (x2 + dx) + "," + y2 + " " + x2 + "," + y2;
+}
+
+/* ---------- incremental renderer (perf: build DOM once, update in place) ---------- */
+var updateQueued = false;
+function scheduleUpdate(){
+  if(updateQueued) return;
+  updateQueued = true;
+  requestAnimationFrame(function(){ updateQueued = false; update(); });
+}
+
+function buildDOM(){
+  var NS = "http://www.w3.org/2000/svg";
+  allNodes.forEach(function(n){
+    var g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "node-g"); g.setAttribute("data-id", n.id);
+    var rect = document.createElementNS(NS, "rect");
+    rect.setAttribute("width", n._w); rect.setAttribute("height", NODE_H);
+    rect.setAttribute("rx", 10); rect.setAttribute("class", "node-rect");
+    g.appendChild(rect);
+    var t = document.createElementNS(NS, "text");
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("class", "node-label" + (n.id === "root" ? " root-label" : ""));
+    if(n.id === "root") t.setAttribute("font-size", "15");
+    var ts1 = document.createElementNS(NS, "tspan"); t.appendChild(ts1);
+    var ts2 = document.createElementNS(NS, "tspan"); ts2.setAttribute("class", "node-sub"); t.appendChild(ts2);
+    g.appendChild(t);
+    n._label = t; n._ts1 = ts1; n._ts2 = ts2;
+    paintLabel(n);
+    if((n.children || []).length){
+      var tog = document.createElementNS(NS, "g"); tog.setAttribute("class", "toggle");
+      var c = document.createElementNS(NS, "circle");
+      c.setAttribute("r", 10); c.setAttribute("fill", "#ffffff");
+      tog.appendChild(c);
+      var tt = document.createElementNS(NS, "text");
+      tt.setAttribute("text-anchor", "middle");
+      tog.appendChild(tt); g.appendChild(tog);
+      n._tglText = tt; n._tglCirc = c;
+    }
+    if(n.id !== "root"){
+      var badge = document.createElementNS(NS, "g");
+      badge.setAttribute("class", "learn-badge");
+      badge.style.display = "none";
+      badge.style.pointerEvents = "none";
+      var bc = document.createElementNS(NS, "circle");
+      bc.setAttribute("cx", n._w - 5); bc.setAttribute("cy", 5);
+      bc.setAttribute("r", 9); bc.setAttribute("fill", "#16a34a");
+      bc.setAttribute("stroke", "#ffffff"); bc.setAttribute("stroke-width", 2);
+      var bt = document.createElementNS(NS, "text");
+      bt.setAttribute("x", n._w - 5); bt.setAttribute("y", 9);
+      bt.setAttribute("text-anchor", "middle");
+      bt.setAttribute("font-size", "11"); bt.setAttribute("font-weight", "700");
+      bt.setAttribute("fill", "#ffffff");
+      bt.textContent = "\u2713";
+      badge.appendChild(bc); badge.appendChild(bt);
+      g.appendChild(badge);
+      n._badge = badge;
+    }
+    n._g = g; n._rect = rect;
+    gNodes.appendChild(g);
+    if(n.id !== "root"){
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("class", "edge");
+      gEdges.appendChild(path); n._edge = path;
+    }
+  });
+  XLINKS.forEach(function(L){
+    var p = document.createElementNS(NS, "path");
+    p.setAttribute("class", "xlink");
+    var title = document.createElementNS(NS, "title"); title.textContent = L.label;
+    p.appendChild(title); gX.appendChild(p); L._el = p;
+  });
+}
+
+function paintNode(n){
+  paintLabel(n);
+  var isRoot = n.id === "root";
+  var col = isRoot ? "#0f172a" : PHASES[n._phase].color;
+  var light = isRoot ? "#0f172a" : PHASES[n._phase].light;
+  n._g.setAttribute("transform", "translate(" + n._x + "," + (n._cy - NODE_H / 2) + ")");
+  n._rect.setAttribute("fill", light);
+  n._rect.setAttribute("stroke", col);
+  n._rect.setAttribute("stroke-width", isRoot ? 2.5 : 1.6);
+  if(n._tglText){
+    var txc = n._side >= 0 ? n._w : 0;
+    n._tglText.setAttribute("x", txc);
+    n._tglText.setAttribute("y", NODE_H / 2 + 4.5);
+    n._tglText.setAttribute("fill", col);
+    n._tglText.textContent = n._collapsed ? "+" : "\u2013";
+    n._tglCirc.setAttribute("cx", txc);
+    n._tglCirc.setAttribute("cy", NODE_H / 2);
+    n._tglCirc.setAttribute("stroke", col);
+    n._tglCirc.setAttribute("stroke-width", 1.5);
+  }
+  /* learned mark: green check badge + slight dimming */
+  var isL = n.id !== "root" && !!learned[n.id];
+  if(n._badge) n._badge.style.display = isL ? "" : "none";
+  n._g.style.opacity = isL ? "0.78" : "";
+}
+
+function update(){
+  relayout();
+  var i, n, L, a, b;
+  for(i = 0; i < allNodes.length; i++){
+    n = allNodes[i];
+    var vis = (n.id === "root") || isVisible(n);
+    n._g.style.display = vis ? "" : "none";
+    if(vis) paintNode(n);
+    if(n._edge){
+      var show = vis && !!n._parent;
+      n._edge.style.display = show ? "" : "none";
+      if(show){
+        n._edge.setAttribute("d", edgePath(n._parent, n));
+        n._edge.setAttribute("stroke", PHASES[n._phase].color);
+      }
+    }
+  }
+  for(i = 0; i < XLINKS.length; i++){
+    L = XLINKS[i];
+    a = nodeMap[L.from]; b = nodeMap[L.to];
+    var ok = showLinks && a && b && isVisible(a) && isVisible(b);
+    L._el.style.display = ok ? "" : "none";
+    if(ok){
+      var mx = (a._cx + b._cx) / 2, my = (a._cy + b._cy) / 2;
+      var dx = b._cx - a._cx, dy = b._cy - a._cy, len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var off = Math.min(90, Math.max(40, len * 0.18));
+      var cx = mx + (-dy / len) * off, cy = my + (dx / len) * off;
+      L._el.setAttribute("d", "M" + a._cx + "," + a._cy + " Q" + cx + "," + cy + " " + b._cx + "," + b._cy);
+    }
+  }
+  applyTransform();
+}
+
+function applyTransform(){ viewport.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + k + ")"; }
+function svgSize(){ var r = svg.getBoundingClientRect(); return { w: r.width, h: r.height }; }
+
+/* fitView is defensive: it NEVER applies a degenerate (zero/NaN) transform.
+   On some mobile WebViews the container measures 0x0 at init (layout not settled);
+   the old code then applied scale(0) and the whole map went permanently invisible.
+   Now it bails out and retries with backoff instead. */
+var fitRetries = 0, FIT_MAX_RETRIES = 6;
+function retryFit(){
+  if(fitRetries >= FIT_MAX_RETRIES) return;
+  fitRetries++;
+  setTimeout(fitView, 300 * fitRetries);
+}
+function fitView(){
+  var s = svgSize();
+  if(s.w < 40 || s.h < 40){ retryFit(); return; }   // container not laid out yet — do NOT apply scale(0)
+  var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  allNodes.forEach(function(n){
+    if(n.id !== "root" && !isVisible(n)) return;
+    minX = Math.min(minX, n._x); maxX = Math.max(maxX, n._x + n._w);
+    minY = Math.min(minY, n._cy - NODE_H / 2); maxY = Math.max(maxY, n._cy + NODE_H / 2);
+  });
+  var bw = maxX - minX + 120, bh = maxY - minY + 120;
+  if(!(bw > 0) || !(bh > 0)){ retryFit(); return; }
+  var nk = Math.min(s.w / bw, s.h / bh, 1.6);
+  if(!isFinite(nk) || nk <= 0){ retryFit(); return; }
+  k = Math.max(0.05, nk);
+  tx = s.w / 2 - ((minX + maxX) / 2) * k;
+  ty = s.h / 2 - ((minY + maxY) / 2) * k;
+  fitRetries = 0; // success — reset backoff
+  applyTransform();
+}
+function zoomAt(f, cx, cy){
+  var s = svgSize(); cx = cx === undefined ? s.w / 2 : cx; cy = cy === undefined ? s.h / 2 : cy;
+  var wx = (cx - tx) / k, wy = (cy - ty) / k;
+  k = Math.min(3, Math.max(0.12, k * f));
+  tx = cx - wx * k; ty = cy - wy * k; applyTransform();
+}
+
+/* ================= INTERACTIONS ================= */
+function toggleNode(id){
+  var n = nodeMap[id]; if(!n || !(n.children || []).length) return;
+  n._collapsed = !n._collapsed; scheduleUpdate();
+}
+
+/* ---------- unified pointer handling: mouse + touch, pan + pinch + tap ---------- */
+var isTouchDevice = (window.matchMedia && window.matchMedia("(hover: none)").matches) || ("ontouchstart" in window);
+var pointers = new Map();   // pointerId -> {x, y}
+var pinch = null;           // {d0, cx0, cy0, k0, tx0, ty0} in svg-local coords
+var downInfo = null;        // {x, y, t, moved} for tap-vs-drag detection
+var startTx = 0, startTy = 0;
+function pdist(a, b){ var dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy); }
+
+/* ---------- long-press (500ms, no move) toggles the learned mark ---------- */
+var lpTimer = null, lpFired = false;
+function armLongPress(e){
+  cancelLongPress();
+  if(e.pointerType === "mouse" && e.button > 0) return; // left button only on desktop
+  var el = document.elementFromPoint ? document.elementFromPoint(e.clientX, e.clientY) : null;
+  var g = el && el.closest ? el.closest(".node-g") : null;
+  if(!g) return;
+  var n = nodeMap[g.getAttribute("data-id")];
+  if(!n || n.id === "root") return;
+  lpFired = false;
+  lpTimer = setTimeout(function(){
+    lpTimer = null; lpFired = true;
+    if(downInfo) downInfo.moved = true; // suppress the tap that would otherwise follow
+    toggleLearned(n);
+    try { if(navigator.vibrate) navigator.vibrate(30); } catch(err){}
+  }, 500);
+}
+function cancelLongPress(){
+  if(lpTimer){ clearTimeout(lpTimer); lpTimer = null; }
+}
+
+svg.addEventListener("pointerdown", function(e){
+  if(e.cancelable) e.preventDefault();
+  try { svg.setPointerCapture(e.pointerId); } catch(err){}
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  hideTip();
+  if(pointers.size === 2){
+    cancelLongPress();
+    var pts = Array.from(pointers.values());
+    var r0 = svg.getBoundingClientRect();
+    pinch = {
+      d0: Math.max(1, pdist(pts[0], pts[1])),
+      cx0: (pts[0].x + pts[1].x) / 2 - r0.left,
+      cy0: (pts[0].y + pts[1].y) / 2 - r0.top,
+      k0: k, tx0: tx, ty0: ty
+    };
+    panning = false; downInfo = null;
+    svg.classList.remove("panning");
+  } else if(pointers.size === 1){
+    downInfo = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false };
+    panning = true; startTx = tx; startTy = ty;
+    svg.classList.add("panning");
+    armLongPress(e);
+  }
+});
+/* ---------- rich tooltip (250ms hover delay, follows mouse, clamped) ---------- */
+var tipTimer = null, tipNode = null;
+function escHtml(s){
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function tipInfo(n){ return DETAIL[n.id] || null; }
+function showTip(n, cx, cy){
+  var title = curLabel(n);
+  var sub = (LANG === "vi" && n.id !== "root" && viLabel(n)) ? n.label : "";
+  var html = '<span class="t">' + escHtml(title) + (sub ? '<br><span class="ten">' + escHtml(sub) + "</span>" : "") + "</span>";
+  html += '<span class="d">' + escHtml(curDef(n)) + "</span>";
+  var _k = curKey(n); if(_k) html += '<span class="k">\u25C6 ' + escHtml(_k) + "</span>";
+  var _t = curTip(n); if(_t) html += '<span class="tip">🎯 ' + escHtml(_t) + "</span>";
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  positionTip(cx, cy);
+}
+function positionTip(cx, cy){
+  var tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  var lx = cx + 18, ly = cy + 20;
+  if(lx + tw > window.innerWidth - 12) lx = cx - tw - 14;
+  if(ly + th > window.innerHeight - 12) ly = cy - th - 16;
+  tooltip.style.left = Math.max(8, lx) + "px";
+  tooltip.style.top = Math.max(8, ly) + "px";
+}
+function hideTip(){
+  if(tipTimer){ clearTimeout(tipTimer); tipTimer = null; }
+  tipNode = null;
+  tooltip.style.display = "none";
+}
+svg.addEventListener("pointermove", function(e){
+  if(pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  // else: mouse hover move with no buttons pressed — fall through to hover logic below
+  if(pinch && pointers.size >= 2){
+    var pts = Array.from(pointers.values());
+    var d = Math.max(1, pdist(pts[0], pts[1]));
+    var r = svg.getBoundingClientRect();
+    var cx = (pts[0].x + pts[1].x) / 2 - r.left;
+    var cy = (pts[0].y + pts[1].y) / 2 - r.top;
+    var nk = Math.min(3, Math.max(0.12, pinch.k0 * (d / pinch.d0)));
+    // keep the world point under the pinch midpoint fixed, then follow midpoint drift
+    var wx = (pinch.cx0 - pinch.tx0) / pinch.k0;
+    var wy = (pinch.cy0 - pinch.ty0) / pinch.k0;
+    k = nk; tx = cx - wx * nk; ty = cy - wy * nk;
+    applyTransform();
+    return;
+  }
+  if(panning && downInfo){
+    var dx = e.clientX - downInfo.x, dy = e.clientY - downInfo.y;
+    if(Math.abs(dx) + Math.abs(dy) > 8){ downInfo.moved = true; cancelLongPress(); }
+    tx = startTx + dx; ty = startTy + dy; applyTransform();
+    return;
+  }
+  if(isTouchDevice) return; // no hover tooltips on touch screens
+  var gel = (e.target && e.target.closest) ? e.target.closest(".node-g") : null;
+  if(gel){
+    var n = nodeMap[gel.getAttribute("data-id")];
+    if(n && tipNode !== n){
+      hideTip();
+      tipNode = n;
+      (function(nn, cx2, cy2){
+        tipTimer = setTimeout(function(){ showTip(nn, cx2, cy2); tipTimer = null; }, 250);
+      })(n, e.clientX, e.clientY);
+    } else if(n && tooltip.style.display === "block"){
+      positionTip(e.clientX, e.clientY);
+    }
+  } else hideTip();
+});
+function endPointer(e, cancelled){
+  pointers.delete(e.pointerId);
+  cancelLongPress();
+  if(pinch){
+    if(pointers.size < 2){
+      pinch = null;
+      if(pointers.size === 1 && !cancelled){
+        var rp = Array.from(pointers.values())[0];
+        downInfo = { x: rp.x, y: rp.y, t: Date.now(), moved: true };
+        panning = true; startTx = tx; startTy = ty;
+        svg.classList.add("panning");
+      } else { panning = false; svg.classList.remove("panning"); downInfo = null; }
+    }
+    return;
+  }
+  if(panning){ panning = false; svg.classList.remove("panning"); }
+  if(!cancelled && downInfo && !downInfo.moved && !lpFired && (Date.now() - downInfo.t) < 600){
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var g = el && el.closest ? el.closest(".node-g") : null;
+    if(g){
+      var nn = nodeMap[g.getAttribute("data-id")];
+      if(nn){ toggleNode(nn.id); openDetail(nn); }
+    } else {
+      detailPanel.classList.remove("open");
+    }
+  }
+  downInfo = null;
+  lpFired = false;
+}
+svg.addEventListener("pointerup", function(e){ endPointer(e, false); });
+svg.addEventListener("pointercancel", function(e){ endPointer(e, true); });
+svg.addEventListener("pointerleave", function(e){ cancelLongPress(); if(pointers.size === 0) hideTip(); });
+svg.addEventListener("wheel", function(e){
+  e.preventDefault();
+  var r = svg.getBoundingClientRect();
+  zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+
+document.getElementById("btnZoomIn").onclick = function(){ zoomAt(1.3); };
+document.getElementById("btnZoomOut").onclick = function(){ zoomAt(1 / 1.3); };
+document.getElementById("btnFit").onclick = fitView;
+document.getElementById("btnExpand").onclick = function(){ allNodes.forEach(function(n){ n._collapsed = false; }); scheduleUpdate(); };
+document.getElementById("btnCollapse").onclick = function(){
+  allNodes.forEach(function(n){ n._collapsed = !!(n.children || []).length && n.id !== "root"; });
+  scheduleUpdate();
+};
+document.getElementById("btnLinks").onclick = function(){
+  showLinks = !showLinks;
+  this.classList.toggle("active", showLinks);
+  scheduleUpdate();
+};
+
+/* ---- search ---- */
+var searchInput = document.getElementById("search"), searchBox = document.getElementById("searchResults");
+function nodePath(n){ var parts = [], p = n; while(p){ parts.unshift(curLabel(p)); p = p._parent; } return parts.join(" › "); }
+var searchTimer = null;
+searchInput.addEventListener("input", function(){
+  if(searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(doSearch, 220);
+});
+function doSearch(){
+  var q = searchInput.value.trim().toLowerCase();
+  if(q.length < 2){ searchBox.style.display = "none"; return; }
+  var hits = allNodes.filter(function(n){
+    if(n.label.toLowerCase().indexOf(q) !== -1) return true;
+    var v = VIinfo(n.id);
+    return !!(v && v.l_vi && v.l_vi.toLowerCase().indexOf(q) !== -1);
+  }).slice(0, 14);
+  if(!hits.length){ searchBox.innerHTML = '<div class="sr">' + escHtml(T("noMatches")) + "</div>"; }
+  else searchBox.innerHTML = hits.map(function(n){
+    var _sub = (LANG === "vi" && n.id !== "root" && viLabel(n)) ? '<span class="path">EN: ' + escHtml(n.label) + "</span>" : "";
+    return '<div class="sr" data-id="' + n.id + '">' + escHtml(curLabel(n)) + _sub + '<span class="path">' + escHtml(nodePath(n)) + "</span></div>";
+  }).join("");
+  searchBox.style.display = "block";
+}
+searchBox.addEventListener("click", function(e){
+  var el = e.target.closest(".sr"); if(!el || !el.getAttribute("data-id")) return;
+  var n = nodeMap[el.getAttribute("data-id")];
+  var p = n._parent; while(p){ p._collapsed = false; p = p._parent; }
+  scheduleUpdate(); searchBox.style.display = "none"; searchInput.value = curLabel(n);
+  var s = svgSize();
+  tx = s.w / 2 - n._cx * k; ty = s.h / 2 - n._cy * k; applyTransform();
+  var g = gNodes.querySelector('[data-id="' + n.id + '"]');
+  if(g){ g.classList.add("highlight"); setTimeout(function(){ g.classList.remove("highlight"); }, 3200); }
+});
+document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ searchBox.style.display = "none"; hideTip(); detailPanel.classList.remove("open"); var epp = document.getElementById("progressPanel"); if(epp.classList.contains("open")){ epp.classList.remove("open"); if(!document.getElementById("basketPanel").classList.contains("open")) document.getElementById("legend").style.display = ""; } } });
+document.addEventListener("click", function(e){ if(!e.target.closest("#searchWrap")) searchBox.style.display = "none"; });
+
+/* ================= DETAIL PANEL ================= */
+var detailPanel = document.getElementById("detailPanel");
+function openDetail(n){
+  var col = n.id === "root" ? "#0f172a" : PHASES[n._phase].color;
+  var pname = n.id === "root" ? T("overview") : curPhaseName(n._phase);
+  var inB = basketIndex(n.id) !== -1;
+  var html = '<div class="dp-head"><span class="dp-phase" style="background:' + col + '">' + escHtml(pname) + "</span>"
+    + '<button id="dpClose" title="Close">\u00D7</button></div>'
+    + "<h3>" + escHtml(curLabel(n)) + "</h3>";
+  if(LANG === "vi" && n.id !== "root" && viLabel(n)) html += '<p class="dp-en">' + escHtml(n.label) + "</p>";
+  html += '<p class="dp-def">' + escHtml(curDef(n)) + "</p>";
+  var _k2 = curKey(n); if(_k2) html += '<p class="dp-k">\u25C6 ' + escHtml(_k2) + "</p>";
+  var _t2 = curTip(n); if(_t2) html += '<p class="dp-tip">🎯 ' + escHtml(_t2) + "</p>";
+  html += '<button id="dpAdd"' + (inB ? ' class="in"' : "") + ">" + escHtml(inB ? T("inBasket") : T("addToFc")) + "</button>";
+  if(n.id !== "root"){
+    var isL = !!learned[n.id];
+    html += '<button id="dpLearn"' + (isL ? ' class="on"' : "") + ">" + escHtml(isL ? T("markNotLearned") : T("markLearned")) + "</button>";
+  }
+  detailPanel.innerHTML = html;
+  detailPanel._nodeId = n.id;
+  detailPanel.classList.add("open");
+  document.getElementById("dpClose").onclick = function(){ detailPanel.classList.remove("open"); };
+  document.getElementById("dpAdd").onclick = function(){ toggleBasket(n); openDetail(n); };
+  var dl = document.getElementById("dpLearn");
+  if(dl) dl.onclick = function(){ toggleLearned(n); };
+}
+
+/* ================= FLASHCARD BASKET ================= */
+var FC_KEY = "pk0005_flashcards_v1";
+var basket = [];
+function loadBasket(){ try { var r = localStorage.getItem(FC_KEY); basket = r ? (JSON.parse(r) || []) : []; } catch(e){ basket = []; } }
+function saveBasket(){ try { localStorage.setItem(FC_KEY, JSON.stringify(basket)); } catch(e){} }
+function basketIndex(id){ for(var i = 0; i < basket.length; i++) if(basket[i].id === id) return i; return -1; }
+function toggleBasket(n){
+  var i = basketIndex(n.id), v = VIinfo(n.id) || {};
+  if(i === -1) basket.push({ id: n.id, label: n.label, def: curDefEn(n), key: curKeyEn(n),
+    label_vi: v.l_vi || "", def_vi: v.d_vi || "", key_vi: v.k_vi || "" });
+  else basket.splice(i, 1);
+  saveBasket(); renderBasket();
+}
+function curDefEn(n){ var info = DETAIL[n.id]; return (info && info.d) || n.def || ""; }
+function curKeyEn(n){ var info = DETAIL[n.id]; return (info && info.k) || ""; }
+function renderBasket(){
+  document.getElementById("fcCount").textContent = basket.length;
+  document.getElementById("bpCount").textContent = basket.length ? "(" + basket.length + ")" : "";
+  var list = document.getElementById("bpList");
+  if(!basket.length){
+    list.innerHTML = '<div class="bp-empty">' + T("noCards") + "</div>";
+  } else {
+    list.innerHTML = basket.map(function(b, i){
+      return '<div class="fc-item"><span>' + escHtml(bcLabel(b)) + '</span><button data-i="' + i + '" title="' + escHtml(T("remove")) + '">\u00D7</button></div>';
+    }).join("");
+  }
+  document.getElementById("bpStudy").disabled = !basket.length;
+}
+document.getElementById("bpList").addEventListener("click", function(e){
+  var b = e.target.closest ? e.target.closest("button") : null; if(!b) return;
+  var i = parseInt(b.getAttribute("data-i"), 10);
+  if(!isNaN(i)){ basket.splice(i, 1); saveBasket(); renderBasket(); }
+});
+document.getElementById("bpClear").onclick = function(){
+  if(!basket.length) return;
+  if(confirm(T("confirmClearFc"))){ basket = []; saveBasket(); exitStudy(); renderBasket(); }
+};
+document.getElementById("bpClose").onclick = function(){
+  document.getElementById("basketPanel").classList.remove("open");
+  document.getElementById("legend").style.display = "";
+};
+document.getElementById("btnFlashcards").onclick = function(){
+  var p = document.getElementById("basketPanel");
+  var willOpen = !p.classList.contains("open");
+  document.getElementById("progressPanel").classList.remove("open");
+  p.classList.toggle("open", willOpen);
+  document.getElementById("legend").style.display = willOpen ? "none" : "";
+  if(willOpen){ exitStudy(); renderBasket(); }
+};
+document.getElementById("btnProgress").onclick = function(){
+  var p = document.getElementById("progressPanel");
+  var willOpen = !p.classList.contains("open");
+  document.getElementById("basketPanel").classList.remove("open");
+  p.classList.toggle("open", willOpen);
+  document.getElementById("legend").style.display = willOpen ? "none" : "";
+  if(willOpen){ renderProgressPanel(); }
+};
+document.getElementById("ppClose").onclick = function(){
+  document.getElementById("progressPanel").classList.remove("open");
+  if(!document.getElementById("basketPanel").classList.contains("open"))
+    document.getElementById("legend").style.display = "";
+};
+document.getElementById("ppReset").onclick = function(){
+  if(!Object.keys(learned).length) return;
+  if(confirm(T("confirmReset"))){
+    learned = {};
+    saveLearned();
+    scheduleUpdate();
+    updateProgress();
+  }
+};
+
+/* ---- study mode ---- */
+var studyOrder = [], studyIdx = 0, studyFlipped = false;
+function startStudy(){
+  if(!basket.length) return;
+  studyOrder = basket.map(function(_, i){ return i; });
+  studyIdx = 0; studyFlipped = false;
+  document.getElementById("bpList").style.display = "none";
+  var acts = document.querySelector("#basketPanel .bp-actions"); if(acts) acts.style.display = "none";
+  document.getElementById("studyView").style.display = "block";
+  paintCard();
+}
+function paintCard(){
+  if(!studyOrder.length){ exitStudy(); return; }
+  var item = basket[studyOrder[studyIdx]];
+  if(!item){ exitStudy(); return; }
+  document.getElementById("fcFront").textContent = bcLabel(item);
+  document.getElementById("fcBack").textContent = bcDef(item);
+  var _bk = bcKey(item);
+  document.getElementById("fcKey").textContent = _bk ? "\u25C6 " + _bk : "";
+  var _alt = bcAltTerm(item);
+  document.getElementById("fcAlt").textContent = _alt ? ((LANG === "vi" ? "EN: " : "VI: ") + _alt) : "";
+  document.getElementById("fcCard").classList.toggle("flipped", studyFlipped);
+  document.getElementById("fcCount2").textContent = (studyIdx + 1) + " / " + studyOrder.length;
+}
+function exitStudy(){
+  studyOrder = []; studyIdx = 0; studyFlipped = false;
+  var sv = document.getElementById("studyView"); if(sv) sv.style.display = "none";
+  var bl = document.getElementById("bpList"); if(bl) bl.style.display = "";
+  var acts = document.querySelector("#basketPanel .bp-actions"); if(acts) acts.style.display = "";
+  renderBasket();
+}
+document.getElementById("bpStudy").onclick = startStudy;
+document.getElementById("fcExit").onclick = exitStudy;
+document.getElementById("fcCard").onclick = function(){ studyFlipped = !studyFlipped; paintCard(); };
+document.getElementById("fcPrev").onclick = function(){ if(studyOrder.length){ studyIdx = (studyIdx - 1 + studyOrder.length) % studyOrder.length; studyFlipped = false; paintCard(); } };
+document.getElementById("fcNext").onclick = function(){ if(studyOrder.length){ studyIdx = (studyIdx + 1) % studyOrder.length; studyFlipped = false; paintCard(); } };
+document.getElementById("fcShuffle").onclick = function(){
+  for(var i = studyOrder.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = studyOrder[i]; studyOrder[i] = studyOrder[j]; studyOrder[j] = t;
+  }
+  studyIdx = 0; studyFlipped = false; paintCard();
+};
+document.getElementById("fcRemove").onclick = function(){
+  if(!studyOrder.length) return;
+  basket.splice(studyOrder[studyIdx], 1);
+  saveBasket();
+  if(!basket.length){ exitStudy(); return; }
+  studyOrder = basket.map(function(_, i){ return i; });
+  if(studyIdx >= studyOrder.length) studyIdx = 0;
+  studyFlipped = false; paintCard(); renderBasket();
+};
+
+/* ================= LEARNED MARKS + PROGRESS ================= */
+var LN_KEY = "pk0005_learned_v1";
+var learned = {};
+function loadLearned(){ try { var r = localStorage.getItem(LN_KEY); learned = r ? (JSON.parse(r) || {}) : {}; } catch(e){ learned = {}; } }
+function saveLearned(){ try { localStorage.setItem(LN_KEY, JSON.stringify(learned)); } catch(e){} }
+/* progress counts "concept" nodes: everything except the root and the 5 phase nodes */
+function isCountable(n){ return n.id !== "root" && n._parent && n._parent.id !== "root"; }
+function phaseStats(p){
+  var t = 0, l = 0, i, n;
+  for(i = 0; i < allNodes.length; i++){ n = allNodes[i]; if(n._phase === p && isCountable(n)){ t++; if(learned[n.id]) l++; } }
+  return { t: t, l: l };
+}
+function overallStats(){
+  var t = 0, l = 0, i, n;
+  for(i = 0; i < allNodes.length; i++){ n = allNodes[i]; if(isCountable(n)){ t++; if(learned[n.id]) l++; } }
+  return { t: t, l: l };
+}
+function pctOf(s){ return s.t ? Math.round(s.l / s.t * 100) : 0; }
+function toggleLearned(n){
+  if(!n || n.id === "root") return;
+  if(learned[n.id]) delete learned[n.id]; else learned[n.id] = 1;
+  saveLearned();
+  paintNode(n);
+  updateProgress();
+  if(detailPanel.classList.contains("open") && detailPanel._nodeId === n.id) openDetail(n);
+}
+function renderProgressPanel(){
+  var o = overallStats(), pct = pctOf(o);
+  document.getElementById("ppTotal").textContent = pct + "%";
+  document.getElementById("ppOverallFill").style.width = pct + "%";
+  document.getElementById("ppOverallText").textContent = o.l + " / " + o.t + " " + T("conceptsLearned");
+  var html = "";
+  for(var p = 1; p <= 5; p++){
+    var s = phaseStats(p), pp = pctOf(s);
+    html += '<div class="pp-row"><span class="dot" style="background:' + PHASES[p].color + '"></span>'
+      + '<span class="pp-name">' + escHtml(curPhaseName(p)) + '</span>'
+      + '<span class="pp-bar"><span class="pp-fill" style="width:' + pp + '%"></span></span>'
+      + '<span class="pp-count">' + s.l + "/" + s.t + '</span>'
+      + '<span class="pp-pct">' + pp + '%</span></div>';
+  }
+  document.getElementById("ppRows").innerHTML = html;
+}
+function updateProgress(){
+  var o = overallStats(), pct = pctOf(o);
+  document.getElementById("lpText").textContent = pct + "%";
+  document.getElementById("lpFill").style.width = pct + "%";
+  document.getElementById("btnProgress").title = T("progressTip")(o.l, o.t);
+  for(var p = 1; p <= 5; p++){
+    var el = document.getElementById("phPct" + p);
+    if(el) el.textContent = pctOf(phaseStats(p)) + "%";
+  }
+  var pp = document.getElementById("progressPanel");
+  if(pp && pp.classList.contains("open")) renderProgressPanel();
+}
+
+/* ================= INIT ================= */
+indexTree(DATA, null, 0);
+if(LANG === "vi") NODE_H = 46; /* taller nodes for two-line VI labels */
+loadLearned();
+buildDOM();
+update();
+fitView();
+loadBasket();
+renderBasket();
+/* language toggle wiring */
+document.getElementById("langEN").classList.toggle("on", LANG === "en");
+document.getElementById("langVI").classList.toggle("on", LANG === "vi");
+document.getElementById("langEN").onclick = function(){ setLang("en"); };
+document.getElementById("langVI").onclick = function(){ setLang("vi"); };
+applyI18n();
+updateProgress();
+/* mobile: collapsible legend */
+
+var legendToggle = document.getElementById("legendToggle");
+if(legendToggle) legendToggle.addEventListener("click", function(){ document.getElementById("legend").classList.toggle("open"); });
+var rszTimer = null;
+window.addEventListener("resize", function(){
+  if(rszTimer) clearTimeout(rszTimer);
+  rszTimer = setTimeout(function(){
+    if(document.activeElement === searchInput) return; // on-screen keyboard open: don't reset the view
+    fitView();
+  }, 250);
+});
+window.addEventListener("orientationchange", function(){ setTimeout(fitView, 350); });
+/* ---- self-heal for mobile WebViews that lay out late ----
+   If the map container measured 0 at init, refit as soon as it gains a real size. */
+function transformHealthy(){ return isFinite(k) && isFinite(tx) && isFinite(ty) && k > 0.01; }
+if(window.ResizeObserver){
+  try {
+    var roLastW = 0, roLastH = 0;
+    var ro = new ResizeObserver(function(entries){
+      var r = entries[0].contentRect;
+      var wasBad = roLastW < 40 || roLastH < 40;
+      roLastW = r.width; roLastH = r.height;
+      if(wasBad && r.width >= 40 && r.height >= 40){ fitRetries = 0; fitView(); }
+    });
+    ro.observe(document.getElementById("mapWrap"));
+  } catch(e){}
+}
+function healCheck(){
+  var s = svgSize();
+  if((s.w < 40 || s.h < 40 || !transformHealthy()) && fitRetries < FIT_MAX_RETRIES){
+    fitRetries++;
+    setTimeout(fitView, 300);
+  }
+}
+window.addEventListener("load", function(){
+  setTimeout(healCheck, 400);
+  setTimeout(healCheck, 1500);
+  setTimeout(healCheck, 3000);
+});
+</script>
+</body>
+</html>
