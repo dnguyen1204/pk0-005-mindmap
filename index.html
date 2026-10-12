@@ -1295,7 +1295,7 @@ function loadGuideScripts(){
 
 /* ---- chunked build: renders 10 sections per frame, no jank ---- */
 function buildGuide(){
-  var d = GUIDE.data;
+  var d = GUIDE.data, buildLang = LANG;
   if(!d){ GUIDE.building = false; return; }
   loadGuideRead();
   renderGuideParts();
@@ -1319,8 +1319,8 @@ function buildGuide(){
     if(i < d.sections.length){ (window.requestAnimationFrame || function(f){ setTimeout(f, 0); })(chunk); }
     else {
       GUIDE.built = true; GUIDE.building = false;
-      applyGuideI18nStatic();
-      updateGuideProgress();
+      if(LANG !== buildLang){ refreshGuideLang(); }
+      else { applyGuideI18nStatic(); updateGuideProgress(); }
       if(GUIDE.query || GUIDE.part >= 0) applyGuideFilter();
     }
   }
@@ -1566,8 +1566,8 @@ function refreshGuideLang(){
 
 function applyGuideI18nStatic(){
   var tm = document.getElementById("tabMindmap"), tg = document.getElementById("tabGuide");
-  if(tm) tm.innerHTML = "\U0001F5FA\uFE0F " + escHtml(T("tabMindmap"));
-  if(tg) tg.innerHTML = "\U0001F4D6 " + escHtml(T("tabGuide"));
+  if(tm) tm.innerHTML = "🗺️ " + escHtml(T("tabMindmap"));
+  if(tg) tg.innerHTML = "📖 " + escHtml(T("tabGuide"));
   var gs = document.getElementById("guideSearch");
   if(gs) gs.placeholder = T("guideSearchPh");
   var ge = document.getElementById("guideExpandAll");
