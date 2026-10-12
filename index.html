@@ -1259,13 +1259,14 @@ function setTab(t){
 }
 
 /* ---- lazy data load (keeps first paint fast) ---- */
+var GUIDE_FILES_EN = ["guide-en.js","guide-en-1.js","guide-en-2.js","guide-en-3.js","guide-en-4.js","guide-en-5.js"];
+var GUIDE_FILES_VI = ["guide-vi.js","guide-vi-1.js","guide-vi-2.js","guide-vi-3.js","guide-vi-4.js","guide-vi-5.js","guide-vi-6.js","guide-vi-7.js"];
+var GUIDE_EXPECTED_SECTIONS = 160;
 function loadGuideScripts(){
   GUIDE.building = true;
   var content = document.getElementById("guideContent");
   content.innerHTML = '<div class="gsk"></div><div class="gsk"></div><div class="gsk"></div><div class="gsk"></div><div class="gsk"></div>';
-  var files = [];
-  if(typeof GUIDE_DATA_EN === "undefined") files.push("guide-en.js");
-  if(typeof GUIDE_DATA_VI === "undefined") files.push("guide-vi.js");
+  var files = GUIDE_FILES_EN.concat(GUIDE_FILES_VI);
   var i = 0;
   function fail(){
     GUIDE.building = false;
@@ -1275,8 +1276,10 @@ function loadGuideScripts(){
   }
   function next(){
     if(i >= files.length){
+      var okEn = (typeof GUIDE_DATA_EN !== "undefined") && GUIDE_DATA_EN.sections.length === GUIDE_EXPECTED_SECTIONS;
+      var okVi = (typeof GUIDE_DATA_VI !== "undefined") && GUIDE_DATA_VI.sections.length === GUIDE_EXPECTED_SECTIONS;
+      if(!okEn || !okVi){ fail(); return; }
       GUIDE.data = guideDataObj();
-      if(!GUIDE.data){ fail(); return; }
       indexGuideData();
       buildGuide();
       return;
