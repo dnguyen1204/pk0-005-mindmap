@@ -1557,7 +1557,7 @@ function refreshGuideLang(){
   }
   for(var m = 0; m < GUIDE.secs.length; m++){
     var v = GUIDE.secs[m];
-    if(v.card.style.display !== "none") paintSectionText(v);
+    paintSectionText(v); /* repaint ALL sections, including ones hidden by the part filter */
     paintGuideRead(v);
   }
   applyGuideI18nStatic();
