@@ -543,13 +543,16 @@ function setLang(l){
   NODE_H = (l === "vi") ? 46 : 32;
   document.getElementById("langEN").classList.toggle("on", l === "en");
   document.getElementById("langVI").classList.toggle("on", l === "vi");
-  applyI18n();
-  rebuildDOM();
-  if(detailPanel.classList.contains("open") && detailPanel._nodeId && nodeMap[detailPanel._nodeId]) openDetail(nodeMap[detailPanel._nodeId]);
-  var pp = document.getElementById("progressPanel");
-  if(pp && pp.classList.contains("open")) renderProgressPanel();
-  updateProgress();
-  if(typeof refreshGuideLang === "function") refreshGuideLang();
+  /* translate the Study Guide first and independently: it must work even if a mindmap i18n step throws */
+  try { if(typeof refreshGuideLang === "function") refreshGuideLang(); } catch(e){}
+  try { applyI18n(); } catch(e){}
+  try { rebuildDOM(); } catch(e){}
+  try {
+    if(detailPanel.classList.contains("open") && detailPanel._nodeId && nodeMap[detailPanel._nodeId]) openDetail(nodeMap[detailPanel._nodeId]);
+    var pp = document.getElementById("progressPanel");
+    if(pp && pp.classList.contains("open")) renderProgressPanel();
+  } catch(e){}
+  try { updateProgress(); } catch(e){}
 }
 /* flashcard bilingual helpers (also migrate old-format entries) */
 function viOf(id){ return VIinfo(id) || {}; }
