@@ -544,12 +544,13 @@ function setLang(l){
   document.getElementById("langEN").classList.toggle("on", l === "en");
   document.getElementById("langVI").classList.toggle("on", l === "vi");
   applyI18n();
-  rebuildDOM();
+  try { rebuildDOM(); } catch(e){ document.title = "DBG rebuildDOM ERR: " + e.message; return; }
   if(detailPanel.classList.contains("open") && detailPanel._nodeId && nodeMap[detailPanel._nodeId]) openDetail(nodeMap[detailPanel._nodeId]);
   var pp = document.getElementById("progressPanel");
   if(pp && pp.classList.contains("open")) renderProgressPanel();
-  updateProgress();
-  if(typeof refreshGuideLang === "function") refreshGuideLang();
+  try { updateProgress(); } catch(e){ document.title = "DBG updateProgress ERR: " + e.message; return; }
+  if(typeof refreshGuideLang === "function"){ try { refreshGuideLang(); document.title = "DBG refreshGuideLang OK lang=" + LANG; } catch(e){ document.title = "DBG refreshGuideLang ERR: " + e.message; } }
+  else { document.title = "DBG refreshGuideLang MISSING"; }
 }
 /* flashcard bilingual helpers (also migrate old-format entries) */
 function viOf(id){ return VIinfo(id) || {}; }
