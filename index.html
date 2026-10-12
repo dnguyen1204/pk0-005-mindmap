@@ -544,20 +544,12 @@ function setLang(l){
   document.getElementById("langEN").classList.toggle("on", l === "en");
   document.getElementById("langVI").classList.toggle("on", l === "vi");
   applyI18n();
-  try { rebuildDOM(); } catch(e){ guideDbg("rebuildDOM: " + e.message); return; }
+  rebuildDOM();
   if(detailPanel.classList.contains("open") && detailPanel._nodeId && nodeMap[detailPanel._nodeId]) openDetail(nodeMap[detailPanel._nodeId]);
   var pp = document.getElementById("progressPanel");
   if(pp && pp.classList.contains("open")) renderProgressPanel();
-  try { updateProgress(); } catch(e){ guideDbg("updateProgress: " + e.message); return; }
-  if(typeof refreshGuideLang === "function"){ try { refreshGuideLang(); guideDbg("refreshGuideLang OK lang=" + LANG); } catch(e){ guideDbg("refreshGuideLang THREW: " + e.message); } }
-  else { guideDbg("refreshGuideLang MISSING"); }
-}
-function guideDbg(msg){
-  var b = document.getElementById("guideDbgBadge");
-  if(!b){ b = document.createElement("div"); b.id = "guideDbgBadge";
-    b.style.cssText = "position:fixed;bottom:8px;left:8px;z-index:99999;background:#b00;color:#fff;padding:8px 12px;font:12px monospace;border-radius:6px;max-width:90vw;";
-    document.body.appendChild(b); }
-  b.textContent = "DBG: " + msg;
+  updateProgress();
+  if(typeof refreshGuideLang === "function") refreshGuideLang();
 }
 /* flashcard bilingual helpers (also migrate old-format entries) */
 function viOf(id){ return VIinfo(id) || {}; }
