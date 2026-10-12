@@ -187,6 +187,99 @@
     #progressPanel .pp-actions button { min-height: 44px; font-size: 13.5px; }
     #dpLearn { min-height: 48px; font-size: 14.5px; }
   }
+
+  /* ================= TABS ================= */
+  #tabBar { display: flex; gap: 6px; padding: 10px 16px 0; background: #ffffff; border-bottom: 1px solid #e2e8f0; flex: 0 0 auto; position: relative; z-index: 45; }
+  .tab { border: 1px solid #e2e8f0; border-bottom: none; background: #f1f5f9; color: #475569; border-radius: 10px 10px 0 0; padding: 9px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: background .18s ease, color .18s ease; }
+  .tab:hover { background: #e2e8f0; color: #0f172a; }
+  .tab.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .tab:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+  .view-enter { animation: viewIn .22s ease; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  /* guide mode: hide mindmap-only toolbar controls and the map itself */
+  #app.guide-mode .map-only { display: none !important; }
+  #app.guide-mode #mapWrap { display: none; }
+  #guideView { display: none; }
+  #app.guide-mode #guideView { display: flex; }
+
+  /* ================= STUDY GUIDE ================= */
+  #guideView { flex: 1 1 auto; min-height: 0; flex-direction: column; overflow: hidden; background: #f8fafc; }
+  #guideTopbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #ffffff; border-bottom: 1px solid #e2e8f0; flex: 0 0 auto; flex-wrap: wrap; position: sticky; top: 0; z-index: 35; }
+  #guideSearchWrap { position: relative; flex: 1 1 240px; max-width: 440px; }
+  #guideSearch { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 12px; font-size: 13px; background: #f8fafc; }
+  #guideSearch:focus { outline: 2px solid #38bdf8; border-color: #38bdf8; background: #fff; }
+  #guideTopbar button.gbtn { border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 8px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; font-weight: 600; transition: background .15s ease; }
+  #guideTopbar button.gbtn:hover { background: #e2e8f0; }
+  #guideReadWrap { display: inline-flex; align-items: center; gap: 7px; margin-left: auto; font-size: 12.5px; font-weight: 700; color: #15803d; }
+  #guideBody { flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden; position: relative; }
+  #guideSidebar { flex: 0 0 248px; overflow-y: auto; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 10px; -webkit-overflow-scrolling: touch; }
+  .gpart-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 1px solid transparent; background: none; border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; margin-bottom: 2px; transition: background .15s ease; }
+  .gpart-item:hover { background: #f1f5f9; }
+  .gpart-item.active { background: #0f172a; color: #fff; }
+  .gpart-item .gpi-num { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; color: #0f172a; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+  .gpart-item.active .gpi-num { background: #38bdf8; color: #0f172a; }
+  .gpart-item .gpi-name { flex: 1 1 auto; line-height: 1.3; }
+  .gpart-item .gpi-pct { flex: 0 0 auto; font-size: 11px; color: #64748b; font-weight: 700; }
+  .gpart-item.active .gpi-pct { color: #bae6fd; }
+  #guideMain { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 16px 20px 90px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+  #guideChips { display: none; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; margin-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  #guideChips::-webkit-scrollbar { display: none; }
+  .gchip { flex: 0 0 auto; border: 1px solid #cbd5e1; background: #fff; border-radius: 999px; padding: 8px 14px; font-size: 12.5px; font-weight: 700; color: #334155; cursor: pointer; white-space: nowrap; }
+  .gchip.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+  .gpart-head { display: flex; align-items: center; gap: 10px; margin: 22px 0 10px; scroll-margin-top: 8px; }
+  .gpart-head:first-child { margin-top: 2px; }
+  .gpart-head h2 { font-size: 17px; font-weight: 800; color: #0f172a; white-space: nowrap; }
+  .gpart-head .gph-count { font-size: 12px; color: #64748b; font-weight: 600; white-space: nowrap; }
+  .gpart-head .gph-bar { flex: 1 1 auto; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; max-width: 220px; margin-left: auto; }
+  .gpart-head .gph-fill { display: block; height: 100%; width: 0; background: #16a34a; border-radius: 3px; transition: width .3s ease; }
+  .gsec { content-visibility: auto; contain-intrinsic-size: auto 120px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; overflow: hidden; transition: border-color .18s ease, box-shadow .18s ease; }
+  .gsec:hover { border-color: #cbd5e1; box-shadow: 0 2px 10px rgba(15,23,42,.06); }
+  .gsec.read { border-color: #bbf7d0; background: #fbfefc; }
+  .gsec-head { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: none; padding: 12px 14px; cursor: pointer; font-size: 14px; }
+  .gsec-check { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; color: transparent; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background .18s ease, border-color .18s ease; line-height: 1; }
+  .gsec-check:hover { border-color: #16a34a; }
+  .gsec.read .gsec-check { background: #16a34a; border-color: #16a34a; color: #fff; }
+  .gsec-title { flex: 1 1 auto; font-weight: 700; color: #0f172a; line-height: 1.4; }
+  .gsec-count { flex: 0 0 auto; font-size: 11.5px; color: #64748b; font-weight: 600; background: #f1f5f9; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+  .gsec-chev { flex: 0 0 auto; color: #94a3b8; font-size: 13px; transition: transform .22s ease; }
+  .gsec.open .gsec-chev { transform: rotate(180deg); }
+  .gsec-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .28s cubic-bezier(.4,0,.2,1); }
+  .gsec.open .gsec-body { grid-template-rows: 1fr; }
+  .gsec-inner { overflow: hidden; min-height: 0; }
+  .gsec-list { list-style: none; padding: 2px 16px 6px 50px; }
+  .gsec-list .b1 { position: relative; font-size: 13.5px; line-height: 1.6; color: #1e293b; margin: 7px 0; padding-left: 16px; }
+  .gsec-list .b1::before { content: "•"; position: absolute; left: 0; color: #0ea5e9; font-weight: 800; }
+  .gsec-list .b2 { position: relative; font-size: 13px; line-height: 1.6; color: #475569; margin: 5px 0 5px 18px; padding-left: 14px; }
+  .gsec-list .b2::before { content: "–"; position: absolute; left: 0; color: #94a3b8; }
+  .gsec-list mark { background: #fde68a; border-radius: 3px; padding: 0 2px; }
+  .gsec-foot { display: flex; justify-content: flex-end; padding: 4px 16px 12px 50px; }
+  .gsec-readbtn { border: 1px solid #bbf7d0; background: #f0fdf4; color: #15803d; border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: background .15s ease; }
+  .gsec-readbtn:hover { background: #dcfce7; }
+  .gsec.read .gsec-readbtn { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+  .gsk { border-radius: 12px; padding: 16px; margin-bottom: 10px; background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; height: 74px; border: 1px solid #e2e8f0; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  #guideEmpty { text-align: center; color: #64748b; padding: 40px 20px; font-size: 14px; line-height: 1.7; }
+  #guideToTop { position: absolute; right: 18px; bottom: 18px; width: 46px; height: 46px; border-radius: 50%; border: none; background: #0f172a; color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity .2s ease, transform .2s ease; z-index: 20; }
+  #guideToTop.show { opacity: 1; pointer-events: auto; transform: none; }
+  @media (max-width: 760px) {
+    #tabBar { padding: 8px 10px 0; }
+    .tab { flex: 1 1 auto; min-height: 44px; padding: 10px 8px; font-size: 13.5px; text-align: center; }
+    #guideSidebar { display: none; }
+    #guideChips { display: flex; }
+    #guideMain { padding: 12px 12px 90px; }
+    #guideTopbar { padding: 6px 10px; gap: 6px; }
+    #guideTopbar button.gbtn { min-height: 40px; }
+    #guideSearchWrap { flex: 1 1 100%; max-width: none; }
+    #guideSearch { font-size: 16px; padding: 9px 12px; }
+    #guideReadWrap { margin-left: 0; }
+    .gsec-list { padding-left: 40px; }
+    .gsec-foot { padding-left: 40px; }
+    .gpart-head h2 { font-size: 15px; white-space: normal; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .view-enter, .gsec-body, .gsec-chev, .gsk, #guideToTop, .tab, .gsec { animation: none !important; transition: none !important; }
+    #guideMain { scroll-behavior: auto; }
+  }
 </style>
 </head>
 <body>
@@ -195,21 +288,42 @@
     <h1>CompTIA Project+ (PK0-005) — Interactive Concept Mindmap <span class="badge" id="examBadge">EXAM MAP</span></h1>
     <p><b>How to use:</b> click any node to expand / collapse its branch &nbsp;•&nbsp; drag to pan, scroll to zoom &nbsp;•&nbsp; search a concept to jump to it &nbsp;•&nbsp; hover a node for a detailed definition &nbsp;•&nbsp; long-press a node to mark it as learned &nbsp;•&nbsp; <b>dashed purple lines</b> show cross-links between related concepts across phases.</p>
   </header>
+  <div id="tabBar" role="tablist" aria-label="App sections">
+    <button id="tabMindmap" class="tab active" role="tab" aria-selected="true">🗺️ Mindmap</button>
+    <button id="tabGuide" class="tab" role="tab" aria-selected="false">📖 Study Guide</button>
+  </div>
   <div id="toolbar">
-    <div id="searchWrap">
+    <div id="searchWrap" class="map-only">
       <input id="search" type="text" placeholder="Search a concept… (e.g. critical path, RACI, EVM)" autocomplete="off">
       <div id="searchResults"></div>
     </div>
-    <button id="btnExpand">Expand all</button>
-    <button id="btnCollapse">Collapse all</button>
-    <button id="btnFit">Fit view</button>
-    <button id="btnZoomIn">+</button>
-    <button id="btnZoomOut">−</button>
-    <button id="btnLinks" class="active">Cross-links</button>
+    <button id="btnExpand" class="map-only">Expand all</button>
+    <button id="btnCollapse" class="map-only">Collapse all</button>
+    <button id="btnFit" class="map-only">Fit view</button>
+    <button id="btnZoomIn" class="map-only">+</button>
+    <button id="btnZoomOut" class="map-only">−</button>
+    <button id="btnLinks" class="map-only active">Cross-links</button>
     <button id="btnFlashcards" title="Open your flashcard basket">🗂 Flashcards (<span id="fcCount">0</span>)</button>
     <div id="langToggle" role="group" aria-label="Language"><button id="langEN" class="on">EN</button><button id="langVI">VI</button></div>
-    <button id="btnProgress" title="Show learning progress">📊 <span class="lp-track"><span class="lp-fill" id="lpFill"></span></span><span id="lpText">0%</span></button>
-    <span id="nodeCount"></span>
+    <button id="btnProgress" class="map-only" title="Show learning progress">📊 <span class="lp-track"><span class="lp-fill" id="lpFill"></span></span><span id="lpText">0%</span></button>
+    <span id="nodeCount" class="map-only"></span>
+  </div>
+  <div id="guideView" aria-label="Study guide">
+    <div id="guideTopbar">
+      <div id="guideSearchWrap"><input id="guideSearch" type="text" autocomplete="off"></div>
+      <button id="guideExpandAll" class="gbtn"></button>
+      <button id="guideCollapseAll" class="gbtn"></button>
+      <div id="guideReadWrap" title=""><span class="lp-track"><span class="lp-fill" id="guideFill"></span></span><span id="guidePctText">0%</span></div>
+    </div>
+    <div id="guideBody">
+      <aside id="guideSidebar" aria-label="Guide parts"><div id="guideParts"></div></aside>
+      <main id="guideMain">
+        <div id="guideChips" role="tablist" aria-label="Guide parts"></div>
+        <div id="guideContent"></div>
+        <div id="guideEmpty" style="display:none"></div>
+      </main>
+      <button id="guideToTop" title="">↑</button>
+    </div>
   </div>
   <div id="mapWrap">
     <svg id="map"><g id="viewport"><g id="xlinks"></g><g id="edges"></g><g id="nodes"></g></g></svg>
@@ -290,7 +404,20 @@ en: {
   nodeCount: function(t){ return t + " concepts \u00B7 5 phases"; },
   progressTip: function(l, t){ return l + " of " + t + " concepts learned \u2014 click for details"; },
   howto: '<b>How to use:</b> click any node to expand / collapse its branch &nbsp;\u2022&nbsp; drag to pan, scroll to zoom &nbsp;\u2022&nbsp; search a concept to jump to it &nbsp;\u2022&nbsp; hover a node for a detailed definition &nbsp;\u2022&nbsp; long-press a node to mark it as learned &nbsp;\u2022&nbsp; <b>dashed purple lines</b> show cross-links between related concepts across phases.',
-  howtoTouch: '<b>How to use:</b> tap a node to expand it &amp; see details &nbsp;\u2022&nbsp; long-press a node to mark it as learned &nbsp;\u2022&nbsp; drag with 1 finger to pan &nbsp;\u2022&nbsp; pinch with 2 fingers to zoom &nbsp;\u2022&nbsp; search a concept to jump to it &nbsp;\u2022&nbsp; <b>dashed purple lines</b> show cross-links.'
+  howtoTouch: '<b>How to use:</b> tap a node to expand it &amp; see details &nbsp;\u2022&nbsp; long-press a node to mark it as learned &nbsp;\u2022&nbsp; drag with 1 finger to pan &nbsp;\u2022&nbsp; pinch with 2 fingers to zoom &nbsp;\u2022&nbsp; search a concept to jump to it &nbsp;\u2022&nbsp; <b>dashed purple lines</b> show cross-links.',
+  tabMindmap: "Mindmap", tabGuide: "Study Guide",
+  guideSearchPh: "Search the study guide\u2026 (e.g. EVM, RACI, charter)",
+  guideExpandAll: "Expand all", guideCollapseAll: "Collapse all",
+  guideMarkRead: "\u2713 Mark as read", guideMarkUnread: "\u21A9 Mark as unread",
+  guideAllParts: "All parts",
+  guideSections: function(n){ return n + " sections"; },
+  guidePoints: function(n){ return n + " points"; },
+  guideNoMatch: "No matches in the study guide. Try another keyword.",
+  guideReadOf: "sections read",
+  guideLoadFail: "Could not load the study guide. Check your connection and reopen the tab.",
+  guideToTop: "Back to top",
+  guideHowto: '<b>Study Guide:</b> the full Dion Training study notes, section by section &nbsp;\u2022&nbsp; expand a section to read every point &nbsp;\u2022&nbsp; tick \u2713 to mark a section as read &nbsp;\u2022&nbsp; search across the whole guide &nbsp;\u2022&nbsp; your reading progress is saved on this device.',
+  guideHowtoTouch: '<b>Study Guide:</b> the full study notes, section by section &nbsp;\u2022&nbsp; tap a section to expand it &nbsp;\u2022&nbsp; tick \u2713 to mark it as read &nbsp;\u2022&nbsp; search the whole guide.'
 },
 vi: {
   searchPh: "T\u00ECm kh\u00E1i ni\u1EC7m\u2026 (v\u00ED d\u1EE5: \u0111\u01B0\u1EDDng g\u0103ng, RACI, EVM)",
@@ -311,7 +438,20 @@ vi: {
   nodeCount: function(t){ return t + " kh\u00E1i ni\u1EC7m \u00B7 5 giai \u0111o\u1EA1n"; },
   progressTip: function(l, t){ return "\u0110\u00E3 h\u1ECDc " + l + " / " + t + " kh\u00E1i ni\u1EC7m \u2014 b\u1EA5m \u0111\u1EC3 xem chi ti\u1EBFt"; },
   howto: '<b>C\u00E1ch d\u00F9ng:</b> b\u1EA5m v\u00E0o node \u0111\u1EC3 m\u1EDF / thu g\u1ECDn nh\u00E1nh &nbsp;\u2022&nbsp; k\u00E9o \u0111\u1EC3 di chuy\u1EC3n, cu\u1ED9n \u0111\u1EC3 zoom &nbsp;\u2022&nbsp; t\u00ECm kh\u00E1i ni\u1EC7m \u0111\u1EC3 nh\u1EA3y t\u1EDBi &nbsp;\u2022&nbsp; di chu\u1ED9t l\u00EAn node \u0111\u1EC3 xem gi\u1EA3i th\u00EDch chi ti\u1EBFt &nbsp;\u2022&nbsp; gi\u1EEF l\u00E2u v\u00E0o node \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc &nbsp;\u2022&nbsp; <b>\u0111\u01B0\u1EDDng n\u00E9t \u0111\u1EE9t m\u00E0u t\u00EDm</b> l\u00E0 li\u00EAn k\u1EBFt ch\u00E9o gi\u1EEFa c\u00E1c kh\u00E1i ni\u1EC7m.',
-  howtoTouch: '<b>C\u00E1ch d\u00F9ng:</b> ch\u1EA1m v\u00E0o node \u0111\u1EC3 m\u1EDF r\u1ED9ng &amp; xem chi ti\u1EBFt &nbsp;\u2022&nbsp; gi\u1EEF l\u00E2u v\u00E0o node \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc &nbsp;\u2022&nbsp; k\u00E9o 1 ng\u00F3n \u0111\u1EC3 di chuy\u1EC3n &nbsp;\u2022&nbsp; pinch 2 ng\u00F3n \u0111\u1EC3 zoom &nbsp;\u2022&nbsp; t\u00ECm kh\u00E1i ni\u1EC7m \u0111\u1EC3 nh\u1EA3y t\u1EDBi &nbsp;\u2022&nbsp; <b>\u0111\u01B0\u1EDDng n\u00E9t \u0111\u1EE9t m\u00E0u t\u00EDm</b> l\u00E0 li\u00EAn k\u1EBFt ch\u00E9o.'
+  howtoTouch: '<b>C\u00E1ch d\u00F9ng:</b> ch\u1EA1m v\u00E0o node \u0111\u1EC3 m\u1EDF r\u1ED9ng &amp; xem chi ti\u1EBFt &nbsp;\u2022&nbsp; gi\u1EEF l\u00E2u v\u00E0o node \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 h\u1ECDc &nbsp;\u2022&nbsp; k\u00E9o 1 ng\u00F3n \u0111\u1EC3 di chuy\u1EC3n &nbsp;\u2022&nbsp; pinch 2 ng\u00F3n \u0111\u1EC3 zoom &nbsp;\u2022&nbsp; t\u00ECm kh\u00E1i ni\u1EC7m \u0111\u1EC3 nh\u1EA3y t\u1EDBi &nbsp;\u2022&nbsp; <b>\u0111\u01B0\u1EDDng n\u00E9t \u0111\u1EE9t m\u00E0u t\u00EDm</b> l\u00E0 li\u00EAn k\u1EBFt ch\u00E9o.',
+  tabMindmap: "S\u01A1 \u0111\u1ED3", tabGuide: "T\u00E0i li\u1EC7u h\u1ECDc",
+  guideSearchPh: "T\u00ECm trong t\u00E0i li\u1EC7u\u2026 (v\u00ED d\u1EE5: EVM, RACI, charter)",
+  guideExpandAll: "M\u1EDF t\u1EA5t c\u1EA3", guideCollapseAll: "Thu g\u1ECDn",
+  guideMarkRead: "\u2713 \u0110\u00E1nh d\u1EA5u \u0111\u00E3 \u0111\u1ECDc", guideMarkUnread: "\u21A9 B\u1ECF \u0111\u00E1nh d\u1EA5u",
+  guideAllParts: "T\u1EA5t c\u1EA3 c\u00E1c ph\u1EA7n",
+  guideSections: function(n){ return n + " m\u1EE5c"; },
+  guidePoints: function(n){ return n + " \u00FD"; },
+  guideNoMatch: "Kh\u00F4ng t\u00ECm th\u1EA5y trong t\u00E0i li\u1EC7u. Th\u1EED t\u1EEB kh\u00F3a kh\u00E1c.",
+  guideReadOf: "m\u1EE5c \u0111\u00E3 \u0111\u1ECDc",
+  guideLoadFail: "Kh\u00F4ng t\u1EA3i \u0111\u01B0\u1EE3c t\u00E0i li\u1EC7u. Ki\u1EC3m tra m\u1EA1ng r\u1ED3i m\u1EDF l\u1EA1i tab.",
+  guideToTop: "V\u1EC1 \u0111\u1EA7u trang",
+  guideHowto: '<b>T\u00E0i li\u1EC7u h\u1ECDc:</b> to\u00E0n b\u1ED9 study notes c\u1EE7a Dion Training, t\u1EEBng m\u1EE5c m\u1ED9t &nbsp;\u2022&nbsp; m\u1EDF m\u1EE5c \u0111\u1EC3 \u0111\u1ECDc \u0111\u1EA7y \u0111\u1EE7 t\u1EEBng \u00FD &nbsp;\u2022&nbsp; tick \u2713 \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 \u0111\u1ECDc &nbsp;\u2022&nbsp; t\u00ECm ki\u1EBFm to\u00E0n b\u1ED9 t\u00E0i li\u1EC7u &nbsp;\u2022&nbsp; ti\u1EBFn \u0111\u1ED9 \u0111\u1ECDc \u0111\u01B0\u1EE3c l\u01B0u tr\u00EAn thi\u1EBFt b\u1ECB n\u00E0y.',
+  guideHowtoTouch: '<b>T\u00E0i li\u1EC7u h\u1ECDc:</b> to\u00E0n b\u1ED9 study notes, t\u1EEBng m\u1EE5c m\u1ED9t &nbsp;\u2022&nbsp; ch\u1EA1m v\u00E0o m\u1EE5c \u0111\u1EC3 m\u1EDF r\u1ED9ng &nbsp;\u2022&nbsp; tick \u2713 \u0111\u1EC3 \u0111\u00E1nh d\u1EA5u \u0111\u00E3 \u0111\u1ECDc &nbsp;\u2022&nbsp; t\u00ECm ki\u1EBFm to\u00E0n b\u1ED9 t\u00E0i li\u1EC7u.'
 }
 };
 function T(k){ var d = I18N[LANG] || I18N.en; return (k in d) ? d[k] : I18N.en[k]; }
@@ -319,7 +459,9 @@ function setText(id, key, suffix){ var el = document.getElementById(id); if(el) 
 
 function applyHowto(){
   var hp = document.querySelector("header p");
-  if(hp) hp.innerHTML = isTouchDevice ? T("howtoTouch") : T("howto");
+  if(!hp) return;
+  if(typeof curTab !== "undefined" && curTab === "guide"){ hp.innerHTML = isTouchDevice ? T("guideHowtoTouch") : T("guideHowto"); return; }
+  hp.innerHTML = isTouchDevice ? T("howtoTouch") : T("howto");
 }
 function renderLegend(){
   var body = document.getElementById("legendBody");
@@ -348,6 +490,7 @@ function applyI18n(){
   renderLegend(); applyHowto();
   var nc = document.getElementById("nodeCount"); if(nc) nc.textContent = T("nodeCount")(allNodes.length);
   renderBasket();
+  if(typeof applyGuideI18nStatic === "function") applyGuideI18nStatic();
 }
 
 /* bilingual node width: in VI mode measure both lines */
@@ -406,6 +549,7 @@ function setLang(l){
   var pp = document.getElementById("progressPanel");
   if(pp && pp.classList.contains("open")) renderProgressPanel();
   updateProgress();
+  if(typeof refreshGuideLang === "function") refreshGuideLang();
 }
 /* flashcard bilingual helpers (also migrate old-format entries) */
 function viOf(id){ return VIinfo(id) || {}; }
@@ -1070,6 +1214,399 @@ function updateProgress(){
   var pp = document.getElementById("progressPanel");
   if(pp && pp.classList.contains("open")) renderProgressPanel();
 }
+
+
+/* ================= STUDY GUIDE TAB ================= */
+var GUIDE = { built: false, building: false, data: null, byId: {}, read: {}, part: -1, query: "", secs: [] };
+var GR_KEY = "pk0005_guide_read_v1";
+var curTab = "map";
+
+function loadGuideRead(){ try { GUIDE.read = JSON.parse(localStorage.getItem(GR_KEY)) || {}; } catch(e){ GUIDE.read = {}; } }
+function saveGuideRead(){ try { localStorage.setItem(GR_KEY, JSON.stringify(GUIDE.read)); } catch(e){} }
+function guideDataObj(){
+  if(LANG === "vi" && typeof GUIDE_DATA_VI !== "undefined") return GUIDE_DATA_VI;
+  if(typeof GUIDE_DATA_EN !== "undefined") return GUIDE_DATA_EN;
+  return null;
+}
+function indexGuideData(){
+  GUIDE.byId = {};
+  if(GUIDE.data) GUIDE.data.sections.forEach(function(s){ GUIDE.byId[s.id] = s; });
+}
+function guidePartName(p){
+  var d = GUIDE.data;
+  if(!d || !d.parts[p]) return "";
+  return (LANG === "vi") ? d.parts[p].name : d.parts[p].name_en;
+}
+function guideViewById(id){
+  for(var i = 0; i < GUIDE.secs.length; i++) if(GUIDE.secs[i].id === id) return GUIDE.secs[i];
+  return null;
+}
+
+/* ---- tab switching ---- */
+function setTab(t){
+  if((t !== "map" && t !== "guide") || curTab === t) return;
+  curTab = t;
+  var gm = (t === "guide");
+  document.getElementById("app").classList.toggle("guide-mode", gm);
+  var tm = document.getElementById("tabMindmap"), tg = document.getElementById("tabGuide");
+  tm.classList.toggle("active", !gm); tg.classList.toggle("active", gm);
+  tm.setAttribute("aria-selected", String(!gm)); tg.setAttribute("aria-selected", String(gm));
+  var showEl = gm ? document.getElementById("guideView") : document.getElementById("mapWrap");
+  showEl.classList.remove("view-enter"); void showEl.offsetWidth; showEl.classList.add("view-enter");
+  applyHowto();
+  if(gm){ if(!GUIDE.built && !GUIDE.building) loadGuideScripts(); }
+  else { setTimeout(function(){ if(curTab === "map" && typeof fitView === "function") fitView(); }, 80); }
+}
+
+/* ---- lazy data load (keeps first paint fast) ---- */
+function loadGuideScripts(){
+  GUIDE.building = true;
+  var content = document.getElementById("guideContent");
+  content.innerHTML = '<div class="gsk"></div><div class="gsk"></div><div class="gsk"></div><div class="gsk"></div><div class="gsk"></div>';
+  var files = [];
+  if(typeof GUIDE_DATA_EN === "undefined") files.push("guide-en.js");
+  if(typeof GUIDE_DATA_VI === "undefined") files.push("guide-vi.js");
+  var i = 0;
+  function fail(){
+    GUIDE.building = false;
+    content.innerHTML = "";
+    var e = document.getElementById("guideEmpty");
+    e.style.display = ""; e.textContent = T("guideLoadFail");
+  }
+  function next(){
+    if(i >= files.length){
+      GUIDE.data = guideDataObj();
+      if(!GUIDE.data){ fail(); return; }
+      indexGuideData();
+      buildGuide();
+      return;
+    }
+    var sc = document.createElement("script");
+    sc.src = files[i++];
+    sc.onload = next;
+    sc.onerror = fail;
+    document.head.appendChild(sc);
+  }
+  next();
+}
+
+/* ---- chunked build: renders 10 sections per frame, no jank ---- */
+function buildGuide(){
+  var d = GUIDE.data;
+  if(!d){ GUIDE.building = false; return; }
+  loadGuideRead();
+  renderGuideParts();
+  renderGuideChips();
+  var content = document.getElementById("guideContent");
+  content.innerHTML = "";
+  document.getElementById("guideEmpty").style.display = "none";
+  GUIDE.secs = [];
+  var frag = document.createDocumentFragment(), i = 0, lastPart = -1;
+  function chunk(){
+    var end = Math.min(i + 10, d.sections.length);
+    for(; i < end; i++){
+      var s = d.sections[i];
+      if(s.part !== lastPart){ frag.appendChild(makePartHead(s.part)); lastPart = s.part; }
+      var v = makeSectionView(s);
+      GUIDE.secs.push(v);
+      frag.appendChild(v.card);
+    }
+    content.appendChild(frag);
+    frag = document.createDocumentFragment();
+    if(i < d.sections.length){ (window.requestAnimationFrame || function(f){ setTimeout(f, 0); })(chunk); }
+    else {
+      GUIDE.built = true; GUIDE.building = false;
+      applyGuideI18nStatic();
+      updateGuideProgress();
+      if(GUIDE.query || GUIDE.part >= 0) applyGuideFilter();
+    }
+  }
+  chunk();
+}
+
+function makePartHead(p){
+  var h = document.createElement("div");
+  h.className = "gpart-head"; h.id = "gpart-" + p; h.setAttribute("data-part", p);
+  var n = 0, ds = GUIDE.data.sections;
+  for(var i = 0; i < ds.length; i++) if(ds[i].part === p) n++;
+  h.innerHTML = '<h2></h2><span class="gph-count"></span><span class="gph-bar"><span class="gph-fill"></span></span>';
+  h.querySelector("h2").textContent = (p + 1) + ". " + guidePartName(p);
+  h.querySelector(".gph-count").textContent = T("guideSections")(n);
+  return h;
+}
+
+function hiMark(text, q){
+  if(!q) return escHtml(text);
+  var low = text.toLowerCase(), out = "", pos = 0, idx = low.indexOf(q);
+  if(idx < 0) return escHtml(text);
+  while(idx >= 0){
+    out += escHtml(text.slice(pos, idx)) + "<mark>" + escHtml(text.slice(idx, idx + q.length)) + "</mark>";
+    pos = idx + q.length;
+    idx = low.indexOf(q, pos);
+  }
+  return out + escHtml(text.slice(pos));
+}
+
+function makeSectionView(s){
+  var card = document.createElement("article");
+  card.className = "gsec"; card.id = "gsec-" + s.id; card.setAttribute("data-part", s.part);
+  card.innerHTML =
+    '<button type="button" class="gsec-head" aria-expanded="false">' +
+      '<span class="gsec-check" role="checkbox" aria-checked="false">\u2713</span>' +
+      '<span class="gsec-title"></span>' +
+      '<span class="gsec-count"></span>' +
+      '<span class="gsec-chev">\u25BE</span>' +
+    '</button>' +
+    '<div class="gsec-body"><div class="gsec-inner">' +
+      '<ul class="gsec-list"></ul>' +
+      '<div class="gsec-foot"><button type="button" class="gsec-readbtn"></button></div>' +
+    '</div></div>';
+  var v = {
+    id: s.id, part: s.part, card: card,
+    head: card.querySelector(".gsec-head"),
+    title: card.querySelector(".gsec-title"),
+    count: card.querySelector(".gsec-count"),
+    list: card.querySelector(".gsec-list"),
+    check: card.querySelector(".gsec-check"),
+    rbtn: card.querySelector(".gsec-readbtn"),
+    open: false, autoOpened: false, _pq: null
+  };
+  v.head.addEventListener("click", function(){ setSectionOpen(v, !v.open); v.autoOpened = false; });
+  v.check.addEventListener("click", function(ev){ ev.stopPropagation(); toggleGuideRead(v.id); });
+  v.rbtn.addEventListener("click", function(){ toggleGuideRead(v.id); });
+  paintSectionText(v);
+  paintGuideRead(v);
+  return v;
+}
+
+function paintSectionText(v){
+  var s = GUIDE.byId[v.id];
+  if(!s) return;
+  var q = GUIDE.query.trim().toLowerCase();
+  v.title.innerHTML = hiMark(s.title, q);
+  var html = "";
+  for(var i = 0; i < s.blocks.length; i++){
+    var b = s.blocks[i];
+    html += '<li class="b' + (b.level === 2 ? "2" : "1") + '">' + hiMark(b.text, q) + "</li>";
+  }
+  v.list.innerHTML = html;
+  v.count.textContent = T("guidePoints")(s.blocks.length);
+  v._pq = q;
+}
+
+function setSectionOpen(v, open){
+  v.open = open;
+  v.card.classList.toggle("open", open);
+  v.head.setAttribute("aria-expanded", String(open));
+}
+
+function paintGuideRead(v){
+  var on = !!GUIDE.read[v.id];
+  v.card.classList.toggle("read", on);
+  v.rbtn.textContent = on ? T("guideMarkUnread") : T("guideMarkRead");
+  v.check.setAttribute("aria-checked", String(on));
+  v.check.title = on ? T("guideMarkUnread") : T("guideMarkRead");
+}
+
+function toggleGuideRead(id){
+  if(GUIDE.read[id]) delete GUIDE.read[id]; else GUIDE.read[id] = 1;
+  saveGuideRead();
+  var v = guideViewById(id);
+  if(v) paintGuideRead(v);
+  updateGuideProgress();
+}
+
+function guidePartStats(p){
+  var t = 0, l = 0, ds = GUIDE.data.sections;
+  for(var i = 0; i < ds.length; i++) if(ds[i].part === p){ t++; if(GUIDE.read[ds[i].id]) l++; }
+  return { t: t, l: l };
+}
+
+function updateGuideProgress(){
+  if(!GUIDE.data) return;
+  var t = 0, l = 0, ds = GUIDE.data.sections, i;
+  for(i = 0; i < ds.length; i++){ t++; if(GUIDE.read[ds[i].id]) l++; }
+  var pct = t ? Math.round(l / t * 100) : 0;
+  document.getElementById("guideFill").style.width = pct + "%";
+  document.getElementById("guidePctText").textContent = pct + "%";
+  document.getElementById("guideReadWrap").title = l + " / " + t + " " + T("guideReadOf");
+  var items = document.querySelectorAll(".gpart-item[data-part]"), j, p, s;
+  for(j = 0; j < items.length; j++){
+    p = +items[j].getAttribute("data-part"); s = guidePartStats(p);
+    items[j].querySelector(".gpi-pct").textContent = (s.t ? Math.round(s.l / s.t * 100) : 0) + "%";
+  }
+  var chips = document.querySelectorAll(".gchip[data-part]"), k;
+  for(k = 0; k < chips.length; k++){
+    p = +chips[k].getAttribute("data-part"); s = guidePartStats(p);
+    chips[k].querySelector(".gchip-pct").textContent = (s.t ? Math.round(s.l / s.t * 100) : 0) + "%";
+  }
+  var heads = document.querySelectorAll("#guideContent .gpart-head"), m;
+  for(m = 0; m < heads.length; m++){
+    p = +heads[m].getAttribute("data-part"); s = guidePartStats(p);
+    heads[m].querySelector(".gph-fill").style.width = (s.t ? Math.round(s.l / s.t * 100) : 0) + "%";
+  }
+}
+
+function renderGuideParts(){
+  var d = GUIDE.data, wrap = document.getElementById("guideParts");
+  wrap.innerHTML = "";
+  var all = document.createElement("button");
+  all.type = "button";
+  all.className = "gpart-item" + (GUIDE.part < 0 ? " active" : "");
+  all.innerHTML = '<span class="gpi-num">\u2605</span><span class="gpi-name"></span><span class="gpi-pct"></span>';
+  all.querySelector(".gpi-name").textContent = T("guideAllParts");
+  all.addEventListener("click", function(){ setGuidePart(-1); });
+  wrap.appendChild(all);
+  d.parts.forEach(function(p){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "gpart-item" + (GUIDE.part === p.id ? " active" : "");
+    b.setAttribute("data-part", p.id);
+    b.innerHTML = '<span class="gpi-num">' + (p.id + 1) + '</span><span class="gpi-name"></span><span class="gpi-pct"></span>';
+    b.querySelector(".gpi-name").textContent = guidePartName(p.id);
+    b.addEventListener("click", function(){ setGuidePart(p.id); });
+    wrap.appendChild(b);
+  });
+  updateGuideProgress();
+}
+
+function renderGuideChips(){
+  var d = GUIDE.data, wrap = document.getElementById("guideChips");
+  wrap.innerHTML = "";
+  function chip(label, p){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "gchip" + ((p < 0 && GUIDE.part < 0) || GUIDE.part === p ? " active" : "");
+    if(p >= 0) b.setAttribute("data-part", p);
+    b.innerHTML = '<span class="gchip-name"></span> <span class="gchip-pct"></span>';
+    b.querySelector(".gchip-name").textContent = label;
+    b.addEventListener("click", function(){ setGuidePart(p); });
+    wrap.appendChild(b);
+  }
+  chip(T("guideAllParts"), -1);
+  d.parts.forEach(function(p){ chip((p.id + 1) + ". " + guidePartName(p.id), p.id); });
+  updateGuideProgress();
+}
+
+function setGuidePart(p){
+  GUIDE.part = (GUIDE.part === p) ? -1 : p;
+  renderGuideParts();
+  renderGuideChips();
+  applyGuideFilter();
+}
+
+function applyGuideFilter(){
+  if(!GUIDE.built) return;
+  var q = GUIDE.query.trim().toLowerCase(), part = GUIDE.part;
+  var anyMatch = false, visibleParts = {}, i, j, k;
+  for(i = 0; i < GUIDE.secs.length; i++){
+    var v = GUIDE.secs[i], s = GUIDE.byId[v.id];
+    if(!s) continue;
+    var okPart = (part < 0 || s.part === part), okQ = true;
+    if(q){
+      okQ = s.title.toLowerCase().indexOf(q) >= 0;
+      if(!okQ){
+        for(j = 0; j < s.blocks.length; j++){
+          if(s.blocks[j].text.toLowerCase().indexOf(q) >= 0){ okQ = true; break; }
+        }
+      }
+    }
+    var show = okPart && okQ;
+    var wasHidden = (v.card.style.display === "none");
+    if(show){
+      anyMatch = true;
+      visibleParts[s.part] = 1;
+      if(wasHidden) v.card.style.display = "";
+      if(v._pq !== q) paintSectionText(v);
+      if(q && !v.open){ setSectionOpen(v, true); v.autoOpened = true; }
+      if(!q && v.autoOpened){ setSectionOpen(v, false); v.autoOpened = false; }
+    } else if(!wasHidden){
+      v.card.style.display = "none";
+    }
+  }
+  var heads = document.querySelectorAll("#guideContent .gpart-head");
+  for(k = 0; k < heads.length; k++){
+    var p = +heads[k].getAttribute("data-part");
+    heads[k].style.display = ((part < 0 || p === part) && (!q || visibleParts[p])) ? "" : "none";
+  }
+  var empty = document.getElementById("guideEmpty");
+  if(!anyMatch){ empty.style.display = ""; empty.textContent = T("guideNoMatch"); }
+  else empty.style.display = "none";
+  if(part >= 0 && !q){
+    var h = document.getElementById("gpart-" + part);
+    if(h && h.style.display !== "none") h.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+}
+
+/* ---- language switch: repaint guide text in place ---- */
+function refreshGuideLang(){
+  if(!GUIDE.built || !GUIDE.data) return;
+  GUIDE.data = guideDataObj();
+  indexGuideData();
+  renderGuideParts();
+  renderGuideChips();
+  var heads = document.querySelectorAll("#guideContent .gpart-head"), seen = {}, k;
+  for(k = 0; k < heads.length; k++){
+    var p = +heads[k].getAttribute("data-part");
+    if(seen[p]) continue; seen[p] = 1;
+    heads[k].querySelector("h2").textContent = (p + 1) + ". " + guidePartName(p);
+    heads[k].querySelector(".gph-count").textContent = T("guideSections")(guidePartStats(p).t);
+  }
+  for(var m = 0; m < GUIDE.secs.length; m++){
+    var v = GUIDE.secs[m];
+    if(v.card.style.display !== "none") paintSectionText(v);
+    paintGuideRead(v);
+  }
+  applyGuideI18nStatic();
+  updateGuideProgress();
+}
+
+function applyGuideI18nStatic(){
+  var tm = document.getElementById("tabMindmap"), tg = document.getElementById("tabGuide");
+  if(tm) tm.innerHTML = "\U0001F5FA\uFE0F " + escHtml(T("tabMindmap"));
+  if(tg) tg.innerHTML = "\U0001F4D6 " + escHtml(T("tabGuide"));
+  var gs = document.getElementById("guideSearch");
+  if(gs) gs.placeholder = T("guideSearchPh");
+  var ge = document.getElementById("guideExpandAll");
+  if(ge) ge.textContent = T("guideExpandAll");
+  var gc = document.getElementById("guideCollapseAll");
+  if(gc) gc.textContent = T("guideCollapseAll");
+  var gt = document.getElementById("guideToTop");
+  if(gt) gt.title = T("guideToTop");
+  var empty = document.getElementById("guideEmpty");
+  if(empty && empty.style.display !== "none" && GUIDE.built) empty.textContent = T("guideNoMatch");
+  applyHowto();
+}
+
+/* ---- guide wiring ---- */
+document.getElementById("tabMindmap").addEventListener("click", function(){ setTab("map"); });
+document.getElementById("tabGuide").addEventListener("click", function(){ setTab("guide"); });
+(function(){
+  var input = document.getElementById("guideSearch"), timer = null;
+  input.addEventListener("input", function(){
+    if(timer) clearTimeout(timer);
+    timer = setTimeout(function(){ GUIDE.query = input.value; applyGuideFilter(); }, 200);
+  });
+  input.addEventListener("keydown", function(ev){
+    if(ev.key === "Enter"){ if(timer) clearTimeout(timer); GUIDE.query = input.value; applyGuideFilter(); }
+  });
+})();
+document.getElementById("guideExpandAll").addEventListener("click", function(){
+  for(var i = 0; i < GUIDE.secs.length; i++){
+    var v = GUIDE.secs[i];
+    if(v.card.style.display !== "none"){ setSectionOpen(v, true); v.autoOpened = false; }
+  }
+});
+document.getElementById("guideCollapseAll").addEventListener("click", function(){
+  for(var i = 0; i < GUIDE.secs.length; i++){ setSectionOpen(GUIDE.secs[i], false); GUIDE.secs[i].autoOpened = false; }
+});
+(function(){
+  var main = document.getElementById("guideMain"), btn = document.getElementById("guideToTop");
+  main.addEventListener("scroll", function(){
+    btn.classList.toggle("show", main.scrollTop > 420);
+  }, { passive: true });
+  btn.addEventListener("click", function(){ main.scrollTo({ top: 0, behavior: "smooth" }); });
+})();
 
 /* ================= INIT ================= */
 indexTree(DATA, null, 0);
